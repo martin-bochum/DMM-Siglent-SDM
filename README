@@ -4,9 +4,9 @@ open Console:
 
 sudo apt-get install git
 
-git clone https://github.com/martin-bochum/Multimeter.git
+git clone https://github.com/martin-bochum/DMM-Siglent-SDM
 
-cd ~/Siglent
+cd ~/DMM-Siglent-SDM
 
 sudo apt-get install qtcreator
 sudo apt-get install pyqt5-dev-tools
@@ -38,7 +38,7 @@ sudo reboot    # or
 exit           # restart over DESKTOP.
 -------------------------------------------
 Step 2. Check Software
-cd ~/Siglent
+cd ~/DMM-Siglent-SDM
 python3 sdm30xx.py
 
 ###################################################
@@ -66,33 +66,3 @@ sudo pip3 uninstall pyqtgraph
 sudo apt-get install python3-pyqtgraph       # or sudo apt-get install python-pyqtgraph
 
 ##### #####
-
-------------------------------------------------
-PYVISA SHELL
-martin@intel-nuc:~$ pyvisa-shell
-
-Welcome to the VISA shell. Type help or ? to list commands.
-
-(visa) list
-( 0) USB0::21317::4660::xxxxxxx::0::INSTR
-(visa) open 0
-USB0::21317::4660::xxxxxxx::0::INSTR has been opened.
-You can talk to the device using "write", "read" or "query".
-The default end of message is added to each message.
-(open) query *IDN?
-Response: PEAK,P4095,xxxxxxx,V2.18.0,1
-
-(open) help
-
-Documented commands (type help <topic>):
-========================================
-EOF  attr  close  exit  help  list  open  query  read  termchar  timeout  write
-
-(open) close
-The resource has been closed.
-(visa) exit
-
-Welcome to the VISA shell. Type help or ? to list commands.
-
-(visa) exit
-
