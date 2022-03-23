@@ -20,8 +20,7 @@ import xlsxwriter
 import configparser
 from PIL import Image
 
-#global limit_switch, low_fail, up_fail, db_switch, db_bak, save_timer, save_intervall, save_start, scanner_run, scanner_on, scanner_auswahl, scanner_auswahl_i, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, LOCAL, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, CAP_display, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner
-global G_timer, G_intervall, G_start, SC_card, wb_row, sa_timer, sa_intervall, sa_start, sa_flag, scan_timer, scan_loop_toggle, scan_loop, limit_disable, limit_switch, low_fail, up_fail, upper, lower, upper_val, lower_val, db_switch, db_bak, save_timer, save_intervall, save_start, scanner_run, scanner_on, scanner_auswahl, scanner_auswahl_i, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
+global TEMP_SET, G_timer, G_intervall, G_start, SC_card, wb_row, sa_timer, sa_intervall, sa_start, sa_flag, scan_timer, scan_loop_toggle, scan_loop, limit_disable, limit_switch, low_fail, up_fail, upper, lower, upper_val, lower_val, db_switch, db_bak, save_timer, save_intervall, save_start, scanner_run, scanner_on, scanner_auswahl, scanner_auswahl_i, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
 upper = 0
 lower = 0
 dot_on = 0
@@ -103,8 +102,10 @@ except IndexError:
     PORT = config['hw_settings']['PORT']
     SCREEN = config['hw_settings']['SCREEN']
     SN_SHOW = config['hw_settings']['SN_SHOW']
+    TEMP_TYPE = config['hw_settings']['TEMP_TYPE']
+    TEMP_UNIT = config['hw_settings']['TEMP_UNIT']
     print("multimeter.ini File: HOST=" + HOST + ", PORT=" +  str(PORT) + "\n")
-
+    TEMP_SET = "ROUT:"+TEMP_TYPE+"\nROUT:TEMP:UNIT "+TEMP_UNIT+"\n"
 
 instr=vxi11.Instrument(HOST)
 instr.timeout = 60*1000
@@ -254,7 +255,6 @@ class Ui(QtWidgets.QMainWindow):
         self.CH_comboBox_15.currentIndexChanged.connect(self.combo_15)
         self.CH_comboBox_16.currentIndexChanged.connect(self.combo_16)
 
-
         self.SCconfig_Button.clicked.connect(self.config_write_channals)
         self.SCconfig_Button.setText("Save all Mode\nSettings")
         self.SCconfig_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
@@ -266,7 +266,6 @@ class Ui(QtWidgets.QMainWindow):
             self.SC_Button.setVisible(False)
         self.SCrun_Button.clicked.connect(self.SCrun)
         self.SCloop_Button.setProperty("text","Scanner\nLoop")
-#        action.actionscanner_toggle.connect(lamda checked: self.scanner_loop())
         self.SCloop_Button.clicked.connect(self.scanner_loop)
 
         self.intervall_box.addItem('60 s')
@@ -297,8 +296,6 @@ class Ui(QtWidgets.QMainWindow):
         self.G_intervall_box.currentIndexChanged.connect(self.G_change)
         self.G_iText.setVisible(True)
         
-#        self.connect(SCloop_Button,SIGNAL("clicked()"),b2_clicked)
-
         self.actionAbout.triggered.connect(self.about)
         self.actionExit.triggered.connect(self.exit)
 
@@ -315,9 +312,6 @@ class Ui(QtWidgets.QMainWindow):
         self.graphWidget.setMaximumWidth(739)
         self.graphWidget.setMaximumHeight(453)
         
-#        self.setFixedSize(1262, 304)         # klein mit SC
-#        self.setFixedSize(1266, 796)         # Graph
-
         self.pixmap = QPixmap('sdm3065.bmp')
         self.screenshot.setPixmap(self.pixmap)
         
@@ -329,10 +323,6 @@ class Ui(QtWidgets.QMainWindow):
 #        self.statusBar()
         self.vdc()
         self.show()
-
-#    def b2_clicked():
-#        global btn2pushed
-#        btn2pushed = True
 
     def combo_1(self, dx):
         self.CH_comboBox_1.setCurrentIndex(dx)
@@ -378,7 +368,7 @@ class Ui(QtWidgets.QMainWindow):
             config.write(configfile)        
 
     def SCrun(self):
-        global format_date, format_time, wb_row, sa_timer, sa_intervall, sa_start, sa_flag, scan_loop_toggle, scan_loop, scanner_run, scanner_on, scanner_auswahl, scanner_auswahl_i, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
+        global TEMP_SET, format_date, format_time, wb_row, sa_timer, sa_intervall, sa_start, sa_flag, scan_loop_toggle, scan_loop, scanner_run, scanner_on, scanner_auswahl, scanner_auswahl_i, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
         self.intervall_box.setVisible(False)
         self.Save_Button.setVisible(False)
         self.SCrun_Button.setVisible(True)
@@ -386,20 +376,11 @@ class Ui(QtWidgets.QMainWindow):
             self.SCloop_Button.setVisible(False)
             QMessageBox.about(self, "Info", "DISCONNECT Front Panel Cables !")
         self.SCconfig_Button.setVisible(False)
-#        print(funktion_set)
         if scanner_run == 0:
             instr.write("ROUTe:SCAN ON", encoding='utf-8')
-#            print ("Scan:"+instr.ask("ROUTe:SCAN?", encoding='utf-8'))
-
             instr.write("ROUTe:STARt ON", encoding='utf-8')
-#            print ("Start:"+instr.ask("ROUTe:STARt?", encoding='utf-8'))
-
             instr.write("ROUTe:FUNC STEP", encoding='utf-8')
-#            print ("Func:"+instr.ask("ROUTe:FUNC?", encoding='utf-8'))
-
             instr.write("ROUTe:COUN 1", encoding='utf-8')
-#            print ("Count:"+instr.ask("ROUTe:COUN?", encoding='utf-8'))
-
             instr.write("ROUTe:FREQuency:APERture 0.1", encoding='utf-8')
             instr.write("ROUTe:PERiod:APERture 0.1", encoding='utf-8')
             self.lcdDual.setVisible(True)
@@ -410,23 +391,21 @@ class Ui(QtWidgets.QMainWindow):
                 instr.write("ROUT:LIMI:HIGH "+str(i+1), encoding='utf-8')
                 m_ntc = 0
                 m_per = 0
-#                print (getattr(self, "CH_comboBox_" + str(i)).currentText())
                 if i <= 12:
-                    if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
+                    if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
                         if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,2W,AUTO,SLOW", encoding='utf-8')
                             m_ntc = 1
-#                            print ("in NTC")
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
                             instr.write("ROUT:PER", encoding='utf-8')
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,FRQ,AUTO,SLOW", encoding='utf-8')
                             m_per = 1
-#                            print ("in PER")
-                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC":
+                        elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
+                            instr.write(TEMP_SET+"ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "TEMP":
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
                 elif i >= 13:
                     instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",2A,SLOW", encoding='utf-8')
-
                 instr.write("ROUTe:COUN 1", encoding='utf-8')
                 if i > 1:
                     self.warte(3, i)
@@ -434,6 +413,7 @@ class Ui(QtWidgets.QMainWindow):
                     self.warte(4, i)
                 instr.write("ROUTe:STARt OFF", encoding='utf-8')
                 self.dbText.setVisible(True)
+                self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
                 dummy = instr.ask("ROUTe:DATA? "+str(i), encoding='utf-8')
                 dummy = dummy.replace(',', '')
                 dummy = dummy.replace('  ', ' ')
@@ -444,9 +424,7 @@ class Ui(QtWidgets.QMainWindow):
                 wert = round(float(dummy_1[0]), 9)
                 dummy_a = self.check_wert(wert)
                 fo_string = komma[2].format(wert*dummy_a[1])
-#                print(i," ",wert, dummy, dummy_1[0], dummy_1[1], dummy_a[0], dummy_a[1])
                 if len(dummy_1) == 3:
-#                    print(dummy_1[2],dummy_a[0])
                     if "C" in dummy_1[2]:
                         dummy_1[1] = '°C  '
                     if "F" in dummy_1[2]  and dummy_a[0] == "":
@@ -477,7 +455,6 @@ class Ui(QtWidgets.QMainWindow):
                     self.lcdNumber.setText(fo_string)
                     self.lcdText1.setText(" °C")
                     self.dbText.setText("Channel "+ str(i))
-#                self.SCloop_Button.repaint()
             self.SCrun_Button.setProperty("text","Scanner Start\nSingle Mode")
             self.zeitText.setVisible(True)
             instr.write("*RST; *CLS", encoding='utf-8')
@@ -497,13 +474,11 @@ class Ui(QtWidgets.QMainWindow):
                     full_txt = getattr(self, "CH_lcd_Button_" + str(i)).text()
                     full_txt = full_txt.split(' ')
                     worksheet.write(wb_row, w_wert, float(full_txt[0]))
-#                    print (full_txt, len(full_txt))
                     if len(full_txt) >= 2:
                         worksheet.write(wb_row, w_einheit, full_txt[1])
                     w_wert += 2
                     w_einheit += 2
                 wb_row += 1
-            
             self.zeitText.setText("Last Scan: "+timestamp)
             self.lcdDual.setVisible(False)
             self.dbText.setVisible(False)
@@ -514,7 +489,6 @@ class Ui(QtWidgets.QMainWindow):
             instr.write("ABORt\n*CLS\n*RST", encoding='utf-8')
             instr.write(funktion_set, encoding='utf-8')
             instr.write("TRIGger:DELay:AUTO ON", encoding='utf-8')
-#            QMessageBox.about(self, "Info", "RECONNECT Front Panel Cables ?")
             self.SCconfig_Button.setVisible(True)
 
     def scanner_loop(self):
@@ -525,7 +499,6 @@ class Ui(QtWidgets.QMainWindow):
             scanner_run = 0
             scan_loop = 1
             check_loop = 1
-#            self.SCloop_Button.setProperty("text","Scanner Loop\nOn")
             self.SCloop_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
             self.SCrun()
         elif scan_loop == 1 and check_loop == 0:
@@ -534,8 +507,6 @@ class Ui(QtWidgets.QMainWindow):
             check_loop = 1
             self.SCloop_Button.setProperty("text","Scanner\nLoop")
             self.SCloop_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
-#        self.statusBar().showMessage('Button #2 was pressed')
-#        print(scan_loop, check_loop)
 
 
     def warte(self, zeit_s, i):
@@ -599,8 +570,6 @@ class Ui(QtWidgets.QMainWindow):
         elif zahl > 9.9E+31:
             hugo = ""
             divisor = 1
-
-#        print(zahl, hugo, divisor)
         return(hugo, divisor)
 
     def save_change(self):
@@ -700,7 +669,6 @@ class Ui(QtWidgets.QMainWindow):
 
     def db_change(self, dx):
         self.combobox_db.setCurrentIndex(dx)
-#        instr.write('CALC:SCAL:DBM:REF ' + str(self.combobox_db.currentText()))
         
     def ntc(self):
         global ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner
@@ -709,14 +677,15 @@ class Ui(QtWidgets.QMainWindow):
             self.PTC_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
             ntc_switch = 1
             check_loop = 1
+            self.lcdDual.setVisible(True)
         if ntc_switch == 1 and check_loop == 0:
             self.PTC_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
             check_loop = 1
             ntc_switch = 0
+            self.lcdDual.setVisible(False)
             self.res()
 
     def temp_ntc(self, wert_temp):
- #       print(wert_temp)
         ntcNominal = 10000  #         // Widerstand des NTC bei Nominaltemperatur
         tempNominal = 25    #         // Temperatur bei der der NTC den angegebenen Widerstand hat
         bCoefficient = 3977 #         // Beta Coefficient (B25 aus Datenblatt des NTC)
@@ -727,8 +696,6 @@ class Ui(QtWidgets.QMainWindow):
         temp += 1.0 / (tempNominal + 273.15)  # + (1/To)
         temp = 1.0 / temp                     # Invertieren
         temp -= 273.15                        # Umwandeln in °C
-#        temp -= 1.5                           # correction
-#        print(temp)
         return (temp)
     
     def multi(self):
@@ -786,22 +753,6 @@ class Ui(QtWidgets.QMainWindow):
         self.temp_Button.setStyleSheet("background:rgb(255,255,255)")
         self.db_widget.setVisible(False)
 
-#    def f1_click_start(self):
-#        global f1_start, db_switch, db_bak
-#        self.F1_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
-#        self.F1_Button.setText("Waiting")
-#        self.lcdText2.setText("Waiting")
-#        f1_start = 1
-        
-#    def f1_refresh(self, texttt):
-#        global fi_start, null_ref, null_switch, check_loop, HOST, PORT, SCREEN, LOCAL, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, wert
-#        self.lcdNumber.setProperty("text", texttt)
-#        if f1_start == 1:
-#            self.lcdText2.setText(texttt)
-#            self.F1_Button.setText(texttt)
-#            print(texttt)
-#        sleep(0.1)
-
     def limit(self):
         global wert_limit, limit_switch, low_fail, up_fail, upper, lower, upper_val, lower_val, wert, funktion
         kill_txt = ['V', 'A', 'F', 'Hz', 's', '♪', ' ', 'Ω', '↓', '↑', 'C', 'F', 'K', '°', 'D', 's']
@@ -826,7 +777,6 @@ class Ui(QtWidgets.QMainWindow):
                 lower_val = round(float(lower),9)
             if "G" not in upper and "M" not in upper and "k" not in upper and "m" not in upper and "µ" not in upper and "u" not in upper and "n" not in upper and "p" not in upper:
                 upper_val = round(float(upper),9)
-#            print (upper,lower) 
             if "G" in lower:
                 lower = lower.replace('G', '')
                 lower_val = round(float(lower)*1e+9,9)
@@ -885,7 +835,6 @@ class Ui(QtWidgets.QMainWindow):
             self.l_limit_calc_num.setVisible(False)
             self.u_limit_calc.setStyleSheet("background-color: #464646; color: #ffffff; border: 1px solid white;")
             self.l_limit_calc.setStyleSheet("background-color: #464646; color: #ffffff; border: 1px solid white;")
-#            leer = self.tcpip('CALCulate:NULL:OFFSet 0.00')
             instr.write('CALCulate:LIMit:STATe OFF')
             instr.write('CALC:CLE:IMM')
             instr.write('CALCulate:LIMit:CLEar')
@@ -938,25 +887,6 @@ class Ui(QtWidgets.QMainWindow):
             elif db_switch == 1:
                 check_loop = 1
                 db_switch = 0
-#        if funktion_raw == 'VOLT:AC' and check_loop == 0 and db_switch == 0:
-
-#        self.timer_single.stop()
-#        instr.write("*RST; *CLS", encoding='utf-8')
-#        instr.write("CONF:VOLT:DC 2\nSAMP:COUN 100\nCALC:TRAN:HIST:RANG:AUTO ON\nCALC:TRAN:HIST:POIN 100\nCALC:TRAN:HIST:STAT ON\nINIT", encoding='utf-8')
-#        hugo_raw = instr.ask("CALC:TRAN:HIST:ALL?", encoding='utf-8')
-#        hugo = hugo_raw.split(',')
-#        texttt = "WAITING\n"+str(100-int(hugo[2]))
-#        while int(hugo[2]) <= 99:
-#            hugo_raw = instr.ask("CALC:TRAN:HIST:ALL?", encoding='utf-8')
-#            hugo = hugo_raw.split(',')
-#            texttt = "WAITING "+str(100-int(hugo[2]))+"\n"
-#            self.f1_refresh(texttt)
-#        instr.write("SCDP")
-#        self.result_str = instr.read_raw()
-#        self.pixmap.loadFromData(self.result_str)
-#        self.screenshot.setPixmap(self.pixmap)
-#        instr.write("*RST; *CLS", encoding='utf-8')
-#        f1_start = 0
 
     def f2_click(self):
         global check_loop, VDC, VAC, AC, AAC, RES, TEMP_RDT_TYPE, CAP, leer, scan_text, funktion, bereich, dot_on, funktion_raw, rad, komma, komma_plus, nk, mess_art
@@ -1042,7 +972,6 @@ class Ui(QtWidgets.QMainWindow):
         elif null_switch == 1:
             self.F6_Button.setProperty("text","Rel.\nOff")
             self.F6_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
-
         if funktion == "VOLT":
             if db_switch == 0:
                 self.F1_Button.setProperty("text","dBM Off\nOn")
@@ -1094,7 +1023,6 @@ class Ui(QtWidgets.QMainWindow):
             if DC_filter == 1:
                 self.F3_Button.setProperty("text","Filter On\nOff")
                 self.F3_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
-
         elif funktion == "CURR":
             mess_art = 'DC Current'
             nk = 0
@@ -1128,7 +1056,6 @@ class Ui(QtWidgets.QMainWindow):
             elif DC_filter == 1:
                 self.F3_Button.setProperty("text","Filter On\nOff")
                 self.F3_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
-
         elif funktion == "VOLT:AC":
             self.db_widget.setVisible(True)
             if db_switch == 0:
@@ -1187,7 +1114,6 @@ class Ui(QtWidgets.QMainWindow):
             self.F2_Button.setProperty("text","")
             self.F3_Button.setProperty("text"," ")
             self.F4_Button.setProperty("text"," ")
-
         elif funktion == "CURR:AC":
             mess_art = 'AC Current'
             nk = 0
@@ -1235,7 +1161,6 @@ class Ui(QtWidgets.QMainWindow):
             self.F2_Button.setProperty("text","Unit\n°C")
             self.F3_Button.setProperty("text","Unit\n°F")
             self.F4_Button.setProperty("text","Unit\nK")
-
         elif funktion == "RES":
             mess_art = '2 Wire Resistance'
             nk = 0
@@ -1275,7 +1200,6 @@ class Ui(QtWidgets.QMainWindow):
             self.F2_Button.setProperty("text","")
             self.F3_Button.setProperty("text"," ")
             self.F4_Button.setProperty("text"," ")
-
         elif funktion == "CAP":
             mess_art = 'Capacitance'
             nk = 0
@@ -1307,8 +1231,6 @@ class Ui(QtWidgets.QMainWindow):
             self.F2_Button.setProperty("text","")
             self.F3_Button.setProperty("text"," ")
             self.F4_Button.setProperty("text"," ")
-
-
         elif funktion == "CONT":
             mess_art = 'Continuity'
             nk = 4
@@ -1321,7 +1243,6 @@ class Ui(QtWidgets.QMainWindow):
             self.F3_Button.setProperty("text"," ")
             self.F4_Button.setProperty("text"," ")
             self.F6_Button.setProperty("text"," ")
-
         elif funktion == "DIOD":
             mess_art = 'Diode'
             nk = 4
@@ -1334,8 +1255,6 @@ class Ui(QtWidgets.QMainWindow):
             self.F3_Button.setProperty("text"," ")
             self.F4_Button.setProperty("text"," ")
             self.F6_Button.setProperty("text"," ")
-
-#        print (bereich_raw)
 
     def graphic(self):
         global G_timer, G_intervall, G_start, shot, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, wert
@@ -1377,7 +1296,6 @@ class Ui(QtWidgets.QMainWindow):
             pen = pg.mkPen(color=(0, 0, 0), width=2)
             self.graphWidget.setBackground((170, 255, 0))
             self.graphWidget.setTitle("Siglent SDM 3055-SC ", color="b", size="10pt")
-#            self.graphWidget.setTitle(i_text, color="b", size="10pt")
             styles = {"color": "#000", "font-size": "10px"}
             styles1 = {"color": "#000", "font-size": "14px"}
             self.graphWidget.setLabel("left", funktion, **styles1)
@@ -1387,8 +1305,6 @@ class Ui(QtWidgets.QMainWindow):
             if G_intervall > 0:
                 self.graphWidget.setLabel("bottom", "Measurements * " + str(G_intervall) + "s", **styles)
             self.graphWidget.showGrid(x=True, y=True, alpha=1.0)
-#            self.graphWidget.setXRange(0, 1, padding=0)
-#            self.graphWidget.setYRange(0, 0, padding=0)
             self.graphWidget.enableAutoRange()
             self.graphWidget.hideButtons()
             graph = 1
@@ -1566,8 +1482,6 @@ class Ui(QtWidgets.QMainWindow):
         self.dial.setProperty("toolTip", "Range " + str(VAC))
         self.lcd_dial.setProperty("text", VAC[int(self.dial.value())])
         instr.write("CONF:PER", encoding='utf-8')
-#        instr.write("FREQ:VOLT:RANG:AUTO ONCE", encoding='utf-8')
-#        instr.write("TRIGger:DELay:AUTO ON", encoding='utf-8')
         funktion_set = "CONF:PER"
 
     def res(self):
@@ -1599,7 +1513,6 @@ class Ui(QtWidgets.QMainWindow):
         instr.write("CONT:THR:VAL "+str(self.dial.value())+"\nCONT:VOL:STAT HIGH\nCONF:CONT", encoding='utf-8')
         instr.write("TRIGger:DELay 0.1", encoding='utf-8')
         funktion_set = "CONF:CONT"
-#        print ("CONF:CONT\nCONT:THR:VAL "+str(int(self.dial.value()))+"\nCONT:VOL:STAT HIGH")
 
     def cap(self):
         global db_switch, VDC, VAC, AC, AAC, RES, TEMP_RDT_TYPE, CAP, leer, scan_text, funktion, bereich, dot_on, funktion_raw, funktion_set, rad
@@ -1654,8 +1567,6 @@ class Ui(QtWidgets.QMainWindow):
             self.l_limit_calc.setProperty("placeholderText", str(round(wert_raw-(wert_raw/100*0.025),2)) + '↓')
             self.u_limit_calc.setStyleSheet("background-color: #484848; color: #ffffff; border: 1px solid white;")
             self.l_limit_calc.setStyleSheet("background-color: #484848; color: #ffffff; border: 1px solid white;")
-#        elif limit_switch == 0 and limit_disable == 0:
-#            self.limit_widget.setVisible(False)
         if limit_switch == 1 and limit_disable == 0:
             self.l_limit_calc.setProperty("text", str(lower_val) + '↓')
             self.u_limit_calc.setProperty("text", str(upper_val) + '↑')
@@ -1668,12 +1579,10 @@ class Ui(QtWidgets.QMainWindow):
             elif low_fail > 0:
                 self.l_limit_calc_num.setStyleSheet("background-color: #ffa2a2; color: #000000; border: 1px solid white;")
             if wert_raw >= upper_val:
-#                play_sound("sine", 880, 0.5, 200)  #  duration in milliseconds
                 up_fail = up_fail + 1
                 self.u_limit_calc_num.setStyleSheet("background-color: #ff0000; color: #000000; border: 1px solid white;")
                 self.u_limit_calc_num.setProperty("text", str(up_fail))
             elif wert_raw <= lower_val:
-#                play_sound("sine", 220, 0.5, 200)  #  duration in milliseconds
                 low_fail = low_fail + 1
                 self.l_limit_calc_num.setStyleSheet("background-color: #ff0000; color: #000000; border: 1px solid white;")
                 self.l_limit_calc_num.setProperty("text", str(low_fail))
@@ -1690,7 +1599,6 @@ class Ui(QtWidgets.QMainWindow):
         now = datetime.now()
         timestamp = "%02d:%02d:%02d" % (now.hour, now.minute, now.second)
         self.get_funktion()
-#        print(funktion)
         if cold_boot == 0 and funktion_raw != mess_alt and graph == 1:
             self.graphic()
         if cold_boot == 0 and funktion_raw != mess_alt and ntc_switch == 1:
@@ -1720,7 +1628,6 @@ class Ui(QtWidgets.QMainWindow):
                 nk = 3
             elif wert >= 10:
                 nk = 2
-#        print (wert, funktion)
         if funktion == 'ms':
             funktion = 's'
             nk = 1
@@ -1748,40 +1655,32 @@ class Ui(QtWidgets.QMainWindow):
         elif "p" in funktion:
             self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
             wert = round(wert*1000000000000, 5)
-#            wert = round(float(instr.ask("READ?", encoding='utf-8'))*1000000000000, 5)
             wert_limit = "p"
         elif "n" in funktion:
             self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
             wert = round(wert*1000000000, 5)
-#            wert = round(float(instr.ask("READ?", encoding='utf-8'))*1000000000, 5)
             wert_limit = "n"
         elif "u" in funktion:
             self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
             wert = round(wert*1000000, 5)
-#            wert = round(float(instr.ask("READ?", encoding='utf-8'))*1000000, 5)
             wert_limit = "u"
         elif "µ" in funktion:
             self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
             wert = round(wert*1000000, 5)
-#            wert = round(float(instr.ask("READ?", encoding='utf-8'))*1000000, 5)
             wert_limit = "u"
         elif "m" in funktion:
             self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
             wert = round(wert*1000, 5)
-#            wert = round(float(instr.ask("READ?", encoding='utf-8'))*1000, 5)
             wert_limit = "m"
         elif "k" in funktion:
             self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
             wert = round(wert/1000, 5)
-#            wert = round(float(instr.ask("READ?", encoding='utf-8'))/1000, 5)
             wert_limit = "k"
         elif "M" in funktion:
             self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
             wert = round(wert/1000000, 5)
-#            wert = round(float(instr.ask("READ?", encoding='utf-8'))/1000000, 5)
             wert_limit = "M"
         fo_string = komma[nk].format(wert)
-#        print(str(wert_raw)+funktion)
         if wert == 9.9E+31:
             self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
             fo_string = "Open/Range ?"
@@ -1799,6 +1698,8 @@ class Ui(QtWidgets.QMainWindow):
             self.F6_Button.setProperty("text"," ")
             dummy = self.temp_ntc(wert)
             wert = dummy
+            self.lcdDual.setVisible(True)
+            self.lcdDual.setText(fo_string+" "+funktion)
             fo_string = komma[2].format(dummy)
             mess_art = 'Temperature NTC 10kΩ'
             funktion = '°C'
@@ -1835,7 +1736,6 @@ class Ui(QtWidgets.QMainWindow):
                 self.graphWidget.setTitle(mess_art+" "+funktion, color="b", size="10pt")
             self.graphWidget.plot(x[:max_graph-1],y[:max_graph-1], pen=pen)
             self.graphWidget.show()
-#        print (bereich, bereich_raw, funktion_raw, funktion_set, wert)
         if db_switch == 1:
             ref_ohm = int(self.combobox_db.currentText())
             zw = ((wert)**2)/(float(ref_ohm)*0.001)
@@ -1852,10 +1752,8 @@ class Ui(QtWidgets.QMainWindow):
 
         if scan_loop == 1 and int(scan_timer - save_timer) == 0:
             scan_timer = int(round(time.time())) + sa_intervall
-#            print (scan_loop, int(scan_timer - save_timer))
             self.SCrun()
         if scan_loop == 1 and save_timer <= scan_timer:
-#            print (scan_loop, int(scan_timer - save_timer))
             self.SCloop_Button.setProperty("text","Scanner Loop\nOFF..."+str(int(scan_timer - save_timer)) + " s")
 
         if shot == 1:
@@ -1866,8 +1764,6 @@ class Ui(QtWidgets.QMainWindow):
 
         check_loop = 0
         self.timer_single.start(1)
-
-#        print('Zeit:', timestamp, ' Funktion:', funktion, ' Range:', bereich, ' Wert:', fo_string)
 
 EXIT_CODE_REBOOT = -11231351
 def ende():
