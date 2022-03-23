@@ -1,7 +1,7 @@
 # Linux/Debian Digital Multimeter Control
 Digital Multimeter Control TCP
 
-Linux/Debian/RaspiOS
+Linux / Debian / RaspiOS
 
 Siglent SDM3055, SDM3055-SC<br>
 
