@@ -105,12 +105,12 @@ except IndexError:
     TEMP_TYPE = config['hw_settings']['TEMP_TYPE']
     TEMP_UNIT = config['hw_settings']['TEMP_UNIT']
     print("multimeter.ini File: HOST=" + HOST + ", PORT=" +  str(PORT) + "\n")
-    TEMP_SET = "ROUT:"+TEMP_TYPE+"\nROUT:TEMP:UNIT "+TEMP_UNIT+"\n"
+    TEMP_SET = "ROUT:"+TEMP_TYPE+"\nROUT:TEMP:UNIT "+TEMP_UNIT
 
 instr=vxi11.Instrument(HOST)
 instr.timeout = 60*1000
 # instr.write("*RST; *CLS", encoding='utf-8')
-instr.write("TRIGGER:SOURCE IMMEDIATE;TRIGGER:COUNT 1;SAMPLE:COUNT 1;", encoding='utf-8')
+instr.write("TRIGGER:SOURCE IMMEDIATE;TRIGGER:COUNT 1;SAMPLE:COUNT 1", encoding='utf-8')
 print ('Set Date:' + time.strftime('%Y-%m-%d'))
 print ('Set Time:' + time.strftime('%H:%M:%S'))
 instr.write(':SYST:DATE ' + time.strftime('%Y%m%d'))
@@ -381,8 +381,8 @@ class Ui(QtWidgets.QMainWindow):
             instr.write("ROUTe:STARt ON", encoding='utf-8')
             instr.write("ROUTe:FUNC STEP", encoding='utf-8')
             instr.write("ROUTe:COUN 1", encoding='utf-8')
-            instr.write("ROUTe:FREQuency:APERture 0.1", encoding='utf-8')
-            instr.write("ROUTe:PERiod:APERture 0.1", encoding='utf-8')
+#            instr.write("ROUTe:FREQuency:APERture 0.1", encoding='utf-8')
+#            instr.write("ROUTe:PERiod:APERture 0.1", encoding='utf-8')
             self.lcdDual.setVisible(True)
             self.lcdText2.setVisible(False)
             self.lcdDual.setText("Scanning CH1...CH16")
@@ -391,24 +391,37 @@ class Ui(QtWidgets.QMainWindow):
                 instr.write("ROUT:LIMI:HIGH "+str(i+1), encoding='utf-8')
                 m_ntc = 0
                 m_per = 0
-                if i <= 12:
-                    if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
+                w_t = 3
+                n_c = i+1
+                if i <= 12 and i < n_c:
+                    if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ":
                         if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,2W,AUTO,SLOW", encoding='utf-8')
                             m_ntc = 1
+                            w_t = 3
+                            if i < n_c:
+                                w_t = 4
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
                             instr.write("ROUT:PER", encoding='utf-8')
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,FRQ,AUTO,SLOW", encoding='utf-8')
                             m_per = 1
+                        elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ":
+                            instr.write("ROUT:FREQ", encoding='utf-8')
+                            instr.write("ROUT:CHAN "+str(int(i))+",ON,FRQ,AUTO,SLOW", encoding='utf-8')
+                            m_per = 0
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
-                            instr.write(TEMP_SET+"ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
-                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "TEMP":
+                            instr.write(TEMP_SET, encoding='utf-8')
+                            instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                            w_t = 3
+                            if i < n_c:
+                                w_t = 4
+                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "TEMP" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "FRQ":
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
                 elif i >= 13:
                     instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",2A,SLOW", encoding='utf-8')
                 instr.write("ROUTe:COUN 1", encoding='utf-8')
                 if i > 1:
-                    self.warte(3, i)
+                    self.warte(w_t, i)
                 elif i == 1:
                     self.warte(4, i)
                 instr.write("ROUTe:STARt OFF", encoding='utf-8')
@@ -422,7 +435,7 @@ class Ui(QtWidgets.QMainWindow):
                 dummy_1[1] = dummy_1[1].replace('HZ', 'Hz')
                 dummy_1[1] = dummy_1[1].replace('S', 's')
                 wert = round(float(dummy_1[0]), 9)
-                dummy_a = self.check_wert(wert)
+                dummy_a = list(self.check_wert(wert))
                 fo_string = komma[2].format(wert*dummy_a[1])
                 if len(dummy_1) == 3:
                     if "C" in dummy_1[2]:
@@ -1406,9 +1419,9 @@ class Ui(QtWidgets.QMainWindow):
         self.dial.setProperty("toolTip", "Range " + str(VDC))
         self.lcd_dial.setProperty("text", VDC[int(self.dial.value())])
         instr.write("CONF:VOLT", encoding='utf-8')
-        instr.write("VOLT:FILT ON", encoding='utf-8')
         instr.write("TRIGger:DELay:AUTO ON", encoding='utf-8')
-        instr.write("VOLT:FILT OFF", encoding='utf-8')
+#        instr.write("VOLT:FILT ON", encoding='utf-8')
+#        instr.write("VOLT:FILT OFF", encoding='utf-8')
         funktion_set = "CONF:VOLT"
 
     def adc(self):
