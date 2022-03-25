@@ -34,14 +34,22 @@ komma_plus = ["{0:+07.5f}", "{0:+07.4f}", "{0:+07.3f}", "{0:+07.2f}"]
 komma = ["{0:.5f}", "{0:.4f}", "{0:.3f}", "{0:.2f}", "{0:.1f}"]
 DB_DBM_REF = [50, 75, 93, 110, 124, 125, 135, 150, 250, 300, 500, 600, 800, 900, 1000, 1200, 8000]
 VDC = ["AUTO", "200mV", "2V", "20V", "200V", "1000V"]
+VDC_45 = ["AUTO", "600mV", "6V", "60V", "600V", "1000V"]
 VAC = ["AUTO", "200mV", "2V", "20V", "200V", "750V"]
+VAC_45 = ["AUTO", "600mV", "6V", "60V", "600V", "750V"]
 ADC = ["AUTO", "200µA", "2mA", "20mA", "200mA", "2A", "10A"]
+ADC_45 = ["AUTO", "600µA", "6mA", "60mA", "600mA", "6A", "10A"]
 AAC = ["AUTO", "20mA", "200mA", "2A", "10A"]
+AAC_45 = ["AUTO", "60mA", "600mA", "6A", "10A"]
 RES = ["AUTO", "200", "2000", "20000", "200000", "2000000", "10000000", "100000000"]
+RES_45 = ["AUTO", "600", "6000", "60000", "600000", "6000000", "60000000", "100000000"]
 RES_display = ["AUTO", "200Ω", "2kΩ", "20kΩ", "200kΩ", "2MΩ", "10MΩ", "100MΩ"]
+RES_display_45 = ["AUTO", "600Ω", "6kΩ", "60kΩ", "600kΩ", "6MΩ", "60MΩ", "100MΩ"]
 TEMP_RDT_TYPE = ["KITS90", "NITS90", "EITS90", "JITS90", "TITS90", "SITS90", "RITS90", "BITS90", "PT100", "PT1000"]
 CAP = ["AUTO", "2nF", "20nF", "200nF", "2uF", "20uF", "200uF", "10mF"]
+CAP_65 = ["AUTO", "2nF", "20nF", "200nF", "2uF", "20uF", "200uF", "2mF", "20mF", "100mF"]
 CAP_display = ["AUTO", "2nF", "20nF", "200nF", "2µF", "20µF", "200µF", "10mF"]
+CAP_display_65 = ["AUTO", "2nF", "20nF", "200nF", "2µF", "20µF", "200µF", "2mF", "20mF", "100mF"]
 scanner_auswahl = ["DCV","ACV","FRQ","PER","TEMP","CAP","CONT","2W","DIO","NTC"]
 scanner_auswahl_i = ["DCI","ACI"]
 scanner_run = 0
@@ -90,11 +98,10 @@ wb_row = 0
 SC_card = 'NO'
 
 try:
-    output = 'IP='+argv[1]+' on PORT='+str(int(argv[2]))+' DEBUG='+str(int(argv[3]))
+    output = 'IP='+argv[1]+' on PORT='+str(int(argv[2]))
     print(output)
     HOST = argv[1]
     PORT = int(argv[2])
-    DEBUG = int(argv[3])
 except IndexError:
     config = configparser.ConfigParser()
     config.read('multimeter.ini')
@@ -377,15 +384,19 @@ class Ui(QtWidgets.QMainWindow):
             QMessageBox.about(self, "Info", "DISCONNECT Front Panel Cables !")
         self.SCconfig_Button.setVisible(False)
         if scanner_run == 0:
+            instr.write("CONF:VOLT", encoding='utf-8')
             instr.write("ROUTe:SCAN ON", encoding='utf-8')
-            instr.write("ROUTe:STARt ON", encoding='utf-8')
-            instr.write("ROUTe:FUNC STEP", encoding='utf-8')
+            instr.write(TEMP_SET, encoding='utf-8')
+            instr.write("ROUTe:FREQuency:APERture 0.1", encoding='utf-8')
+            instr.write("ROUTe:PERiod:APERture 0.1", encoding='utf-8')
+            instr.write("ROUTe:FUNC SCAN", encoding='utf-8')
             instr.write("ROUTe:COUN 1", encoding='utf-8')
-#            instr.write("ROUTe:FREQuency:APERture 0.1", encoding='utf-8')
-#            instr.write("ROUTe:PERiod:APERture 0.1", encoding='utf-8')
             self.lcdDual.setVisible(True)
             self.lcdText2.setVisible(False)
             self.lcdDual.setText("Scanning CH1...CH16")
+            self.lcdNumber.setText("-.-----")
+            self.lcdText1.setText(" --")
+            
             for i in range (1,17):
                 instr.write("ROUT:LIMI:LOW "+str(i), encoding='utf-8')
                 instr.write("ROUT:LIMI:HIGH "+str(i+1), encoding='utf-8')
@@ -398,9 +409,6 @@ class Ui(QtWidgets.QMainWindow):
                         if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,2W,AUTO,SLOW", encoding='utf-8')
                             m_ntc = 1
-                            w_t = 3
-                            if i < n_c:
-                                w_t = 4
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
                             instr.write("ROUT:PER", encoding='utf-8')
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,FRQ,AUTO,SLOW", encoding='utf-8')
@@ -410,11 +418,10 @@ class Ui(QtWidgets.QMainWindow):
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,FRQ,AUTO,SLOW", encoding='utf-8')
                             m_per = 0
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
-                            instr.write(TEMP_SET, encoding='utf-8')
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
-                            w_t = 3
-                            if i < n_c:
-                                w_t = 4
+                            w_t = 4
+#                            if i < n_c:
+#                                w_t = 4
                     elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "TEMP" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "FRQ":
                             instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
                 elif i >= 13:
@@ -468,11 +475,6 @@ class Ui(QtWidgets.QMainWindow):
                     self.lcdNumber.setText(fo_string)
                     self.lcdText1.setText(" °C")
                     self.dbText.setText("Channel "+ str(i))
-            self.SCrun_Button.setProperty("text","Scanner Start\nSingle Mode")
-            self.zeitText.setVisible(True)
-            instr.write("*RST; *CLS", encoding='utf-8')
-            now = datetime.now()
-            timestamp = "%02d.%02d.%04d - %02d:%02d:%02d" % (now.day, now.month, now.year, now.hour, now.minute, now.second)
 
             if sa_flag == 1:
                 w_wert = 2
@@ -492,6 +494,11 @@ class Ui(QtWidgets.QMainWindow):
                     w_wert += 2
                     w_einheit += 2
                 wb_row += 1
+
+            self.SCrun_Button.setProperty("text","Scanner Start\nSingle Mode")
+            self.zeitText.setVisible(True)
+            now = datetime.now()
+            timestamp = "%02d.%02d.%04d - %02d:%02d:%02d" % (now.day, now.month, now.year, now.hour, now.minute, now.second)
             self.zeitText.setText("Last Scan: "+timestamp)
             self.lcdDual.setVisible(False)
             self.dbText.setVisible(False)
@@ -530,7 +537,9 @@ class Ui(QtWidgets.QMainWindow):
         save_intervall = 1
         save_start = int(round(time.time())) + save_intervall
         save_loop = 0
+        instr.write("ROUTe:DEL MIN", encoding='utf-8')
         instr.write("ROUTe:STARt ON", encoding='utf-8')
+        dummy = instr.ask("ROUTe:STARt?", encoding='utf-8')
         self.SCrun_Button.setStyleSheet("background-color: #5a5a5a; color: #aa0000;")
         while True:
             now = datetime.now()
@@ -539,7 +548,9 @@ class Ui(QtWidgets.QMainWindow):
                 self.scanner_widget.repaint()
                 check_loop = 0
                 save_start = int(round(time.time())) + save_intervall
-                self.SCrun_Button.setProperty("text","Channel..."+str(i)+"\n"+str(int(zeit_s - save_loop)) + " s")
+                self.SCrun_Button.setProperty("text","CH 0"+str(i)+"\n"+str(int(zeit_s - save_loop)) + " s")
+                if i >= 10:
+                    self.SCrun_Button.setProperty("text","CH "+str(i)+"\n"+str(int(zeit_s - save_loop)) + " s")
                 self.scanner_widget.repaint()
                 self.lcdDual.setText("Scanning Channel "+str(i)+" "+getattr(self, "CH_comboBox_" + str(i)).currentText())
                 if scan_loop == 1:
@@ -1420,8 +1431,9 @@ class Ui(QtWidgets.QMainWindow):
         self.lcd_dial.setProperty("text", VDC[int(self.dial.value())])
         instr.write("CONF:VOLT", encoding='utf-8')
         instr.write("TRIGger:DELay:AUTO ON", encoding='utf-8')
-#        instr.write("VOLT:FILT ON", encoding='utf-8')
-#        instr.write("VOLT:FILT OFF", encoding='utf-8')
+        instr.write("VOLT:FILT ON", encoding='utf-8')
+        sleep(0.1)
+        instr.write("VOLT:FILT OFF", encoding='utf-8')
         funktion_set = "CONF:VOLT"
 
     def adc(self):
