@@ -265,6 +265,7 @@ class Ui(QtWidgets.QMainWindow):
         self.SCconfig_Button.clicked.connect(self.config_write_channals)
         self.SCconfig_Button.setText("Save all Mode\nSettings")
         self.SCconfig_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
+        self.SCrun_Button.setFont(QFont('Noto Sans', 7))
         self.SCrun_Button.setProperty("text","Scanner Start\nSingle Mode")
         if SC_card == "YES":
             self.SC_Button.setVisible(True)
@@ -302,13 +303,20 @@ class Ui(QtWidgets.QMainWindow):
         self.G_intervall_box.setCurrentIndex(0)
         self.G_intervall_box.currentIndexChanged.connect(self.G_change)
         self.G_iText.setVisible(True)
+#        font = QtGui.QFont()
+#        font.setPointSize(8)
+#        self.textEdit.setFont(font)
+        self.textEdit.setStyleSheet("background-color: #464646; color: #ffffff;")
+        self.Clear_Button.clicked.connect(self.clear)
+        self.Clear_Button.setText("Clear Text")
+        self.t_Save_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
+        self.t_Save_Button.setText("Save CSV")
+        self.t_Save_Button.clicked.connect(self.t_save)
+
         
         self.actionAbout.triggered.connect(self.about)
         self.actionExit.triggered.connect(self.exit)
 
-#        font = QtGui.QFont()
-#        font.setPointSize(10)
-#        self.textEdit.setFont(font)
         self.setFixedSize(766, 304)         # klein ohne SC
         self.graph_frame.setFixedWidth(746)
         self.graph_frame.setFixedHeight(459)
@@ -322,7 +330,6 @@ class Ui(QtWidgets.QMainWindow):
         self.pixmap = QPixmap('sdm3065.bmp')
         self.screenshot.setPixmap(self.pixmap)
         
-
         self.timer_single=QTimer()
         self.timer_single.start(250)
         self.timer_single.timeout.connect(self.update)
@@ -330,6 +337,19 @@ class Ui(QtWidgets.QMainWindow):
 #        self.statusBar()
         self.vdc()
         self.show()
+
+    def clear(self):
+        global G_timer, G_intervall, G_start
+        G_intervall = int(self.G_intervall_box.currentText().replace(' s', ''))
+        G_start = int(round(time.time()))
+        self.textEdit.clear()
+
+    def t_save(self):
+        fileName = ""
+        options = QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(self,"Save Log-File","dmmLogFile.csv","Alle Files (*);;Text Files (*.csv)", options=options)
+        with open(fileName, 'w') as logFile:
+            logFile.write(str(self.textEdit.toPlainText()))
 
     def combo_1(self, dx):
         self.CH_comboBox_1.setCurrentIndex(dx)
@@ -379,6 +399,7 @@ class Ui(QtWidgets.QMainWindow):
         self.intervall_box.setVisible(False)
         self.Save_Button.setVisible(False)
         self.SCrun_Button.setVisible(True)
+        self.null_off()
         if scan_loop == 0:
             self.SCloop_Button.setVisible(False)
             QMessageBox.about(self, "Info", "DISCONNECT Front Panel Cables !")
@@ -619,8 +640,8 @@ class Ui(QtWidgets.QMainWindow):
                 worksheet = workbook.add_worksheet()
                 worksheet.set_column('A1:AH', 12)
 
-                worksheet.write(0,0, 'Datum')
-                worksheet.write(0,1, 'Zeit')
+                worksheet.write(0,0, 'Date')
+                worksheet.write(0,1, 'Time')
                 worksheet.write(0,2, 'Channel 01')
                 worksheet.write(0,4, 'Channel 02')
                 worksheet.write(0,6, 'Channel 03')
@@ -967,6 +988,11 @@ class Ui(QtWidgets.QMainWindow):
         elif null_switch == 1:
             instr.write(funktion_raw+":NULL:STAT OFF", encoding='utf-8')
             null_switch = 0
+
+    def null_off(self):
+        global null_ref, null_switch, check_loop, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, wert
+        instr.write(funktion_raw+":NULL:STAT OFF", encoding='utf-8')
+        null_switch = 0
 
     def get_funktion(self):
         global db_switch, db_bak, null_ref, null_switch, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, CAP_display, DC_filter, iz_filter, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, wert
@@ -1621,7 +1647,7 @@ class Ui(QtWidgets.QMainWindow):
             self.f1_click()
             f1_start = 0
         self.timer_single.stop()
-        now = datetime.now()
+#        now = datetime.now()
         timestamp = "%02d:%02d:%02d" % (now.hour, now.minute, now.second)
         self.get_funktion()
         if cold_boot == 0 and funktion_raw != mess_alt and graph == 1:
@@ -1725,6 +1751,7 @@ class Ui(QtWidgets.QMainWindow):
             wert = dummy
             self.lcdDual.setVisible(True)
             self.lcdDual.setText(fo_string+" "+funktion)
+            ntc_fo_string = fo_string+" "+funktion
             fo_string = komma[2].format(dummy)
             mess_art = 'Temperature NTC 10kΩ'
             funktion = '°C'
@@ -1741,8 +1768,45 @@ class Ui(QtWidgets.QMainWindow):
 #        print ("Check ",mess_alt, funktion_raw)
         mess_alt = funktion_raw
         self.limit_show()
-        if int(graph) == 1 and int(G_timer - G_start) >= 0:
+        if db_switch == 1:
+            ref_ohm = int(self.combobox_db.currentText())
+            zw = ((wert)**2)/(float(ref_ohm)*0.001)
+            if zw != 0.0:
+                self.db_widget.setVisible(True)
+                zw = ((wert)**2)/(float(ref_ohm)*0.001)
+                db = round(10*log10(zw),3)
+                self.dbText.setVisible(True)
+                self.dbText.setProperty("text", str(db) + 'dBm ' + str(int(ref_ohm)) + 'Ω')
+            elif zw == 0.0:
+                self.dbText.setVisible(False)
+        elif db_switch == 0:
+            self.dbText.setVisible(False)
+        if int(graph) == 0 and int(G_timer - G_start) >= 0:
             G_start = int(round(time.time())) + G_intervall
+            if null_switch == 0 and db_switch == 0:
+                if ntc_switch == 1:
+                    self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion + "; Temperature NTC 10kΩ, " + ntc_fo_string)
+                elif ntc_switch == 0:
+                    self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion)
+            if null_switch == 1 and db_switch == 0:
+                self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion + "; Rel.0 = "+str(null_ref))
+            elif null_switch == 0 and db_switch == 1:
+                self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion + "; " + self.dbText.text())
+            elif null_switch == 1 and db_switch == 1:
+                self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion + "; Rel.0 = "+str(null_ref) + "; " + self.dbText.text())
+        elif int(graph) == 1 and int(G_timer - G_start) >= 0:
+            G_start = int(round(time.time())) + G_intervall
+            if null_switch == 0 and db_switch == 0:
+                if ntc_switch == 1:
+                    self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion + "; Temperature NTC 10kΩ, " + ntc_fo_string)
+                elif ntc_switch == 0:
+                    self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion)
+            if null_switch == 1 and db_switch == 0:
+                self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion + "; Rel.0 = "+str(null_ref))
+            elif null_switch == 0 and db_switch == 1:
+                self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion + "; " + self.dbText.text())
+            elif null_switch == 1 and db_switch == 1:
+                self.textEdit.append(timestamp + "; " + fo_string.replace(".", ",") + "; " + funktion + "; Rel.0 = "+str(null_ref) + "; " + self.dbText.text())
             messungen += 1
             if wert > max_mess:
                 max_mess = wert + (wert * 0.25)
@@ -1761,19 +1825,6 @@ class Ui(QtWidgets.QMainWindow):
                 self.graphWidget.setTitle(mess_art+" "+funktion, color="b", size="10pt")
             self.graphWidget.plot(x[:max_graph-1],y[:max_graph-1], pen=pen)
             self.graphWidget.show()
-        if db_switch == 1:
-            ref_ohm = int(self.combobox_db.currentText())
-            zw = ((wert)**2)/(float(ref_ohm)*0.001)
-            if zw != 0.0:
-                self.db_widget.setVisible(True)
-                zw = ((wert)**2)/(float(ref_ohm)*0.001)
-                db = round(10*log10(zw),3)
-                self.dbText.setVisible(True)
-                self.dbText.setProperty("text", str(db) + 'dBm ' + str(int(ref_ohm)) + 'Ω')
-            elif zw == 0.0:
-                self.dbText.setVisible(False)
-        elif db_switch == 0:
-            self.dbText.setVisible(False)
 
         if scan_loop == 1 and int(scan_timer - save_timer) == 0:
             scan_timer = int(round(time.time())) + sa_intervall
