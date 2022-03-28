@@ -1,5 +1,5 @@
-# Linux/Debian Digital Multimeter Control
-Digital Multimeter Control TCP
+# Linux/Debian Digital Multimeter Software
+Digital Multimeter Control over LAN
 
 Linux / Debian / RaspiOS
 
