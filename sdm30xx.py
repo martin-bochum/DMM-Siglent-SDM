@@ -267,11 +267,6 @@ class Ui(QtWidgets.QMainWindow):
         self.SCconfig_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
         self.SCrun_Button.setFont(QFont('Noto Sans', 7))
         self.SCrun_Button.setProperty("text","Scanner Start\nSingle Mode")
-        if SC_card == "YES":
-            self.SC_Button.setVisible(True)
-            self.SC_Button.clicked.connect(self.multi)
-        elif SC_card == "NO":
-            self.SC_Button.setVisible(False)
         self.SCrun_Button.clicked.connect(self.SCrun)
         self.SCloop_Button.setProperty("text","Scanner\nLoop")
         self.SCloop_Button.clicked.connect(self.scanner_loop)
@@ -330,6 +325,17 @@ class Ui(QtWidgets.QMainWindow):
         self.pixmap = QPixmap('sdm3065.bmp')
         self.screenshot.setPixmap(self.pixmap)
         
+        if SC_card == "YES":
+            self.SC_Button.setVisible(True)
+            self.SC_Button.clicked.connect(self.multi)
+        elif SC_card == "NO":
+            self.SC_Button.setVisible(True)
+            self.SC_Button.clicked.connect(self.multi)
+            self.intervall_box.setVisible(False)
+            self.Save_Button.setVisible(False)
+            self.SCloop_Button.setVisible(False)
+            self.SCrun_Button.setVisible(False)
+
         self.timer_single=QTimer()
         self.timer_single.start(250)
         self.timer_single.timeout.connect(self.update)
