@@ -4562,7 +4562,7 @@
      <property name="geometry">
       <rect>
        <x>665</x>
-       <y>340</y>
+       <y>320</y>
        <width>88</width>
        <height>30</height>
       </rect>
@@ -4639,7 +4639,7 @@
      <property name="geometry">
       <rect>
        <x>665</x>
-       <y>280</y>
+       <y>260</y>
        <width>88</width>
        <height>30</height>
       </rect>
@@ -4935,7 +4935,7 @@
      <property name="geometry">
       <rect>
        <x>665</x>
-       <y>310</y>
+       <y>290</y>
        <width>88</width>
        <height>30</height>
       </rect>
@@ -5335,6 +5335,83 @@
      </property>
      <property name="text">
       <string>Save</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="SCloop_all_Button">
+     <property name="geometry">
+      <rect>
+       <x>665</x>
+       <y>350</y>
+       <width>88</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>90</red>
+           <green>90</green>
+           <blue>90</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="ButtonText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>90</red>
+           <green>90</green>
+           <blue>90</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="ButtonText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>90</red>
+           <green>90</green>
+           <blue>90</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="ButtonText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>160</red>
+           <green>161</green>
+           <blue>162</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <property name="text">
+      <string>Scan Loop</string>
      </property>
     </widget>
    </widget>
