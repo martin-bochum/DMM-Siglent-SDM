@@ -5613,8 +5613,8 @@
    <widget class="QPushButton" name="PTC_Button">
     <property name="geometry">
      <rect>
-      <x>670</x>
-      <y>245</y>
+      <x>7</x>
+      <y>190</y>
       <width>88</width>
       <height>30</height>
      </rect>
@@ -6091,7 +6091,7 @@
     <property name="geometry">
      <rect>
       <x>375</x>
-      <y>247</y>
+      <y>245</y>
       <width>88</width>
       <height>30</height>
      </rect>
@@ -6492,6 +6492,83 @@
      <string>Oberes Limit</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="run_stop_Button">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>245</y>
+      <width>88</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="palette">
+     <palette>
+      <active>
+       <colorrole role="Button">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>90</red>
+          <green>90</green>
+          <blue>90</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="ButtonText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </active>
+      <inactive>
+       <colorrole role="Button">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>90</red>
+          <green>90</green>
+          <blue>90</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="ButtonText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </inactive>
+      <disabled>
+       <colorrole role="Button">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>90</red>
+          <green>90</green>
+          <blue>90</blue>
+         </color>
+        </brush>
+       </colorrole>
+       <colorrole role="ButtonText">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>160</red>
+          <green>161</green>
+          <blue>162</blue>
+         </color>
+        </brush>
+       </colorrole>
+      </disabled>
+     </palette>
+    </property>
+    <property name="text">
+     <string>STOP</string>
+    </property>
+   </widget>
    <zorder>frame</zorder>
    <zorder>F1_Button</zorder>
    <zorder>F2_Button</zorder>
@@ -6522,6 +6599,7 @@
    <zorder>limit_widget</zorder>
    <zorder>G_intervall_box</zorder>
    <zorder>G_iText</zorder>
+   <zorder>run_stop_Button</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

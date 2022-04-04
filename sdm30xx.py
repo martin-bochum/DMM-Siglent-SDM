@@ -20,7 +20,7 @@ import xlsxwriter
 import configparser
 from PIL import Image
 
-global TEMP_SET, G_timer, G_intervall, G_start, SC_card, wb_row, sa_timer, sa_intervall, sa_start, sa_flag, scan_timer, scan_loop_toggle, scan_loop, limit_disable, limit_switch, low_fail, up_fail, upper, lower, upper_val, lower_val, db_switch, db_bak, save_timer, save_intervall, save_start, scanner_run, scanner_on, scanner_auswahl, scanner_auswahl_i, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
+global run_stop, TEMP_SET, G_timer, G_intervall, G_start, SC_card, wb_row, sa_timer, sa_intervall, sa_start, sa_flag, scan_timer, scan_loop_toggle, scan_loop, limit_disable, limit_switch, low_fail, up_fail, upper, lower, upper_val, lower_val, db_switch, db_bak, save_timer, save_intervall, save_start, scanner_run, scanner_on, scanner_auswahl, scanner_auswahl_i, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
 upper = 0
 lower = 0
 dot_on = 0
@@ -28,6 +28,7 @@ f1_start = 0
 nk = 0
 db_switch = 0
 db_bak = 0
+run_stop = 0
 #worksheet_row_wert = ['DUMMY', 'C1', 'E1', 'G1', 'I1', 'K1', 'M1', 'O1', 'Q1', 'S1', 'U1', 'W1', 'Y1', 'A2', 'C2', 'E2', 'G2']
 #worksheet_row_einheit = ['DUMMY', 'D1', 'F1', 'H1', 'J1', 'L1', 'N1', 'P1', 'R1', 'T1', 'V1', 'X1', 'Z1', 'B2', 'D2', 'F2', 'H2']
 komma_plus = ["{0:+07.5f}", "{0:+07.4f}", "{0:+07.3f}", "{0:+07.2f}"]
@@ -152,22 +153,30 @@ class Ui(QtWidgets.QMainWindow):
         uic.loadUi(SCREEN , self)        # Load the .ui file
         self.setWindowTitle(leer+'  - SC-Card available: '+SC_card)
 
+        self.F1_Button.setFont(QFont('Noto Sans', 8))
         self.F1_Button.setProperty("text"," ")
         self.F1_Button.clicked.connect(self.f1_click)
+        self.F2_Button.setFont(QFont('Noto Sans', 8))
         self.F2_Button.setProperty("text"," ")
         self.F2_Button.clicked.connect(self.f2_click)
+        self.F3_Button.setFont(QFont('Noto Sans', 8))
         self.F3_Button.setProperty("text"," ")
         self.F3_Button.clicked.connect(self.f3_click)
+        self.F4_Button.setFont(QFont('Noto Sans', 8))
         self.F4_Button.setProperty("text"," ")
         self.F4_Button.clicked.connect(self.f4_click)
+        self.F5_Button.setFont(QFont('Noto Sans', 8))
         self.F5_Button.setProperty("text","Graph\nOn")
         self.F5_Button.clicked.connect(self.graphic)
+        self.F6_Button.setFont(QFont('Noto Sans', 8))
         self.F6_Button.setProperty("text"," ")
         self.F6_Button.clicked.connect(self.f6_click)
         self.SCShot_Button.clicked.connect(self.scshot)
         self.SCShot_Button.setProperty("text","Live SC-Shot\nOn")
-        self.PTC_Button.setText("Temp NTC\n10kΩ")
+        self.PTC_Button.setFont(QFont('Noto Sans', 8))
+        self.PTC_Button.setText("Funktion\nNTC 10kΩ")
         self.PTC_Button.clicked.connect(self.ntc)
+        self.PTC_Button.setVisible(False)
 
         self.lcdDual.setVisible(False)
         self.zeitText.setVisible(False)
@@ -244,6 +253,11 @@ class Ui(QtWidgets.QMainWindow):
         for i in range (1,17):
             index_set = getattr(self, "CH_comboBox_" + str(i)).findText(config['channel_settings']['CH'+str(i)])
             getattr(self, "CH_comboBox_" + str(i)).setCurrentIndex(index_set)
+            check_set = config['channel_settings']['CH_check'+str(i)]
+            if check_set == "True":
+                getattr(self, "CH_checkBox_" + str(i)).setChecked(True)
+            elif check_set == "False":
+                getattr(self, "CH_checkBox_" + str(i)).setChecked(False)
 
         self.CH_comboBox_1.currentIndexChanged.connect(self.combo_1)
         self.CH_comboBox_2.currentIndexChanged.connect(self.combo_2)
@@ -301,6 +315,7 @@ class Ui(QtWidgets.QMainWindow):
         self.G_intervall_box.setProperty("enabled", "1")
         self.G_intervall_box.setCurrentIndex(0)
         self.G_intervall_box.currentIndexChanged.connect(self.G_change)
+        self.G_intervall_box.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
         self.G_iText.setVisible(True)
 #        font = QtGui.QFont()
 #        font.setPointSize(8)
@@ -312,6 +327,10 @@ class Ui(QtWidgets.QMainWindow):
         self.t_Save_Button.setText("Save CSV")
         self.t_Save_Button.clicked.connect(self.t_save)
 
+        self.run_stop_Button.setText("STOP")
+        self.run_stop_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
+        self.run_stop_Button.clicked.connect(self.runstop)
+        self.run_stop_Button.setVisible(False)
         
         self.actionAbout.triggered.connect(self.about)
         self.actionExit.triggered.connect(self.exit)
@@ -402,6 +421,8 @@ class Ui(QtWidgets.QMainWindow):
         config.read('channels.ini')
         for i in range(1,16):
             config.set('channel_settings', 'CH'+str(i), getattr(self, "CH_comboBox_" + str(i)).currentText())
+        for i in range(1,17):
+            config.set('channel_settings', 'CH_check'+str(i), str(getattr(self, "CH_checkBox_" + str(i)).isChecked()))
         with open('channels.ini', 'w') as configfile:
             config.write(configfile)        
 
@@ -439,87 +460,93 @@ class Ui(QtWidgets.QMainWindow):
                 m_per = 0
                 w_t = 3
                 n_c = i+1
+                on_off = "OFF"
+                if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
+                    on_off = "ON"
                 if i <= 12 and i < n_c:
                     if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "DIO" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "CAP":
                         if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,2W,AUTO,SLOW", encoding='utf-8')
+                            instr.write("ROUT:CHAN "+str(int(i))+","+on_off+",2W,AUTO,SLOW", encoding='utf-8')
                             m_ntc = 1
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
                             instr.write("ROUT:PER", encoding='utf-8')
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,FRQ,AUTO,SLOW", encoding='utf-8')
+                            instr.write("ROUT:CHAN "+str(int(i))+","+on_off+",FRQ,AUTO,SLOW", encoding='utf-8')
                             m_per = 1
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ":
                             instr.write("ROUT:FREQ", encoding='utf-8')
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,FRQ,AUTO,SLOW", encoding='utf-8')
+                            instr.write("ROUT:CHAN "+str(int(i))+","+on_off+",FRQ,AUTO,SLOW", encoding='utf-8')
                             m_per = 0
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                            instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
                             w_t = 4
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "DIO":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                            instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
                             w_t = 5
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "CAP":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                            instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
                             w_t = 4
                     elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "TEMP" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "FRQ" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "DIO" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "CAP":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                            instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
                 elif i >= 13:
-                    instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",2A,SLOW", encoding='utf-8')
+                    instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",2A,SLOW", encoding='utf-8')
                 instr.write("ROUTe:COUN 1", encoding='utf-8')
                 if i > 1:
-                    self.warte(w_t, i)
+                    self.warte(w_t, i," ")
                 elif i == 1:
-                    self.warte(4, i)
+                    self.warte(4, i," ")
                 instr.write("ROUTe:STARt OFF", encoding='utf-8')
                 self.dbText.setVisible(True)
-                self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
-                dummy = instr.ask("ROUTe:DATA? "+str(i), encoding='utf-8')
-                dummy = dummy.replace(',', '')
-                dummy = dummy.replace('  ', ' ')
-                dummy_1 = dummy.split(' ')
-                dummy_1[1] = dummy_1[1].replace('OHM', 'Ω')
-                dummy_1[1] = dummy_1[1].replace('HZ', 'Hz')
-                dummy_1[1] = dummy_1[1].replace('S', 's')
-                wert = round(float(dummy_1[0]), 12)
-                dummy_a = list(self.check_wert(wert))
-                fo_string = komma[2].format(wert*dummy_a[1])
-                if len(dummy_1) == 3:
-                    if "C" in dummy_1[2]:
-                        dummy_1[1] = '°C  '
-                    if "F" in dummy_1[2]  and dummy_a[0] == "":
-                        dummy_1[1] = '°F  '
-                    elif "F" in dummy_1[2]:
-                        dummy_1[1] = 'F'
-                    if "K" in dummy_1[2]:
-                        dummy_1[1] = 'K   '
-                if wert >= 9.9E+34:
-                    self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
-                    fo_string = "Overload"
-                    dummy_1[1] = ""
-                    dummy_a[0] = ""
-                if wert >= 9.9E+37:
-                    self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
-                    fo_string = "Open"
-                    dummy_1[1] = ""
-                    dummy_a[0] = ""
-                dummy_1[1] = str(dummy_a[0])+str(dummy_1[1]).ljust(3, ' ')
-                if len(dummy_1[1]) == 3:
-                    dummy_1[1] = dummy_1[1]+ " "
-                if getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC":
-                    getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" "+dummy_1[1])
-                    self.lcdNumber.setText(fo_string)
-                    self.lcdText1.setText(dummy_1[1])
-                    self.dbText.setText("Channel "+ str(i))
-                    m_per = 0
-                    instr.write("ROUT:FREQ", encoding='utf-8')
-                elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
-                    m_ntc = 0
-                    ntc = self.temp_ntc(wert/1000)
-                    fo_string = komma[2].format(ntc)
-                    getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" °C  ")
-                    self.lcdNumber.setText(fo_string)
-                    self.lcdText1.setText(" °C")
-                    self.dbText.setText("Channel "+ str(i))
+                self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
+                if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
+                    dummy = instr.ask("ROUTe:DATA? "+str(i), encoding='utf-8')
+                    dummy = dummy.replace(',', '')
+                    dummy = dummy.replace('  ', ' ')
+                    dummy_1 = dummy.split(' ')
+                    dummy_1[1] = dummy_1[1].replace('OHM', 'Ω')
+                    dummy_1[1] = dummy_1[1].replace('HZ', 'Hz')
+                    dummy_1[1] = dummy_1[1].replace('S', 's')
+                    wert = round(float(dummy_1[0]), 15)
+                    dummy_a = list(self.check_wert(wert))
+                    fo_string = komma[0].format(wert*dummy_a[1])
+                    if len(dummy_1) == 3:
+                        if "C" in dummy_1[2]:
+                            dummy_1[1] = '°C  '
+                        if "F" in dummy_1[2]  and dummy_a[0] == "":
+                            dummy_1[1] = '°F  '
+                        elif "F" in dummy_1[2]:
+                            dummy_1[1] = 'F'
+                        if "K" in dummy_1[2]:
+                            dummy_1[1] = 'K   '
+                    if wert >= 9.9E+34:
+                        self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
+                        fo_string = "Overload"
+                        dummy_1[1] = ""
+                        dummy_a[0] = ""
+                    if wert >= 9.9E+37:
+                        self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
+                        fo_string = "Open"
+                        dummy_1[1] = ""
+                        dummy_a[0] = ""
+                    dummy_1[1] = str(dummy_a[0])+str(dummy_1[1]).ljust(3, ' ')
+                    if len(dummy_1[1]) == 3:
+                        dummy_1[1] = dummy_1[1]+ " "
+                    if getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC":
+                        getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" "+dummy_1[1])
+                        self.lcdNumber.setText(fo_string)
+                        self.lcdText1.setText(dummy_1[1])
+                        self.dbText.setText("Channel "+ str(i))
+                        m_per = 0
+                        instr.write("ROUT:FREQ", encoding='utf-8')
+                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
+                        m_ntc = 0
+                        ntc = self.temp_ntc(wert/1000)
+                        fo_string = komma[0].format(ntc)
+                        getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" °C  ")
+                        self.lcdNumber.setText(fo_string)
+                        self.lcdText1.setText(" °C")
+                        self.dbText.setText("Channel "+ str(i))
+                elif getattr(self, "CH_checkBox_" + str(i)).isChecked() == False:
+                    getattr(self, "CH_lcd_Button_" + str(i)).setText("-.----- ----")
 
             if sa_flag == 1:
                 w_wert = 2
@@ -531,20 +558,30 @@ class Ui(QtWidgets.QMainWindow):
                 worksheet.write(wb_row, 0, now, format_date)
                 worksheet.write(wb_row, 1, now, format_time)
                 for i in range (1,17):
-                    full_txt = getattr(self, "CH_lcd_Button_" + str(i)).text()
-                    full_txt = full_txt.split(' ')
-                    if full_txt[0] != "Open":
-                        worksheet.write(wb_row, w_wert, float(full_txt[0]))
-                    worksheet.write(wb_row, w_wert, float(full_txt[0]))
-                    if len(full_txt) >= 2:
-                        worksheet.write(wb_row, w_einheit, full_txt[1])
-                    w_wert += 2
-                    w_einheit += 2
+                    if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
+                        full_txt = getattr(self, "CH_lcd_Button_" + str(i)).text()
+                        full_txt = full_txt.split(' ')
+                        if "Open" not in full_txt[0] and "-.-----" not in full_txt[0]:
+                            worksheet.write(wb_row, w_wert, float(full_txt[0]))
+                        if len(full_txt) >= 2:
+                            worksheet.write(0, w_einheit, getattr(self, "CH_comboBox_" + str(i)).currentText())
+                            worksheet.write(wb_row, w_einheit, full_txt[1])
+                        w_wert += 2
+                        w_einheit += 2
+                    elif getattr(self, "CH_checkBox_" + str(i)).isChecked() == False:
+                        full_txt = getattr(self, "CH_lcd_Button_" + str(i)).text()
+                        full_txt = full_txt.split(' ')
+                        worksheet.write(wb_row, w_wert, 0.00000)
+                        if len(full_txt) >= 2:
+                            worksheet.write(0, w_einheit, getattr(self, "CH_comboBox_" + str(i)).currentText())
+                        w_wert += 2
+                        w_einheit += 2
+                        
                 wb_row += 1
 
             if DC_filter == 0:
                 instr.write("VOLT:FILT ON", encoding='utf-8')
-            self.SCrun_Button.setProperty("text","Scanner OFF")
+            self.SCrun_Button.setProperty("text","Scanner ON")
             self.zeitText.setVisible(True)
             now = datetime.now()
             timestamp = "%02d.%02d.%04d - %02d:%02d:%02d" % (now.day, now.month, now.year, now.hour, now.minute, now.second)
@@ -572,108 +609,167 @@ class Ui(QtWidgets.QMainWindow):
             if DC_filter == 0:
                 instr.write("VOLT:FILT ON", encoding='utf-8')
             instr.write("CONF:VOLT", encoding='utf-8')
-            instr.write("ROUTe:SCAN ON", encoding='utf-8')
-            instr.write(TEMP_SET, encoding='utf-8')
-            instr.write("ROUTe:FREQuency:APERture 0.1", encoding='utf-8')
-            instr.write("ROUTe:PERiod:APERture 0.1", encoding='utf-8')
-            instr.write("ROUTe:FUNC SCAN", encoding='utf-8')
-            instr.write("ROUTe:COUN 1", encoding='utf-8')
             self.lcdDual.setVisible(True)
             self.lcdText2.setVisible(False)
             self.lcdDual.setText("Scanning CH01...CH16")
             self.lcdNumber.setText("-.-----")
             self.lcdText1.setText(" --")
-            
+            instr.write("ROUTe:SCAN ON", encoding='utf-8')
+            instr.write(TEMP_SET, encoding='utf-8')
+            instr.write("ROUTe:FUNC STEP", encoding='utf-8')
+            instr.write("ROUTe:COUN 1", encoding='utf-8')
+            instr.write("ROUTe:FREQuency:APERture 1", encoding='utf-8')
+            instr.write("ROUTe:PERiod:APERture 1", encoding='utf-8')
             for i in range (1,17):
                 m_ntc = 0
                 m_per = 0
                 w_t = 3
-                if i <= 12:
-                    if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "DIO" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "CAP":
-                        if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,2W,AUTO,SLOW", encoding='utf-8')
-                            m_ntc = 1
-                        elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
-                            instr.write("ROUT:PER", encoding='utf-8')
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,FRQ,AUTO,SLOW", encoding='utf-8')
-                            m_per = 1
-                        elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ":
-                            instr.write("ROUT:FREQ", encoding='utf-8')
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,FRQ,AUTO,SLOW", encoding='utf-8')
-                            m_per = 0
-                        elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
-                            w_t = 4
-                        elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "DIO":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
-                            w_t = 5
-                        elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "CAP":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
-                            w_t = 4
-                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "TEMP" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "FRQ" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "DIO" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "CAP":
-                            instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
-                elif i >= 13:
-                    instr.write("ROUT:CHAN "+str(int(i))+",ON,"+getattr(self, "CH_comboBox_" + str(i)).currentText()+",2A,SLOW", encoding='utf-8')
-            instr.write("ROUTe:COUN 1", encoding='utf-8')
+                on_off = "OFF"
+                if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
+                    on_off = "ON"
+                    if i <= 12:
+                        if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "DIO" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "CAP":
+                            if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
+                                instr.write("ROUT:CHAN "+str(int(i))+","+on_off+",2W,AUTO,SLOW", encoding='utf-8')
+                                m_ntc = 1
+                            elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
+                                instr.write("ROUT:PER", encoding='utf-8')
+                                instr.write("ROUT:CHAN "+str(int(i))+","+on_off+",FRQ,AUTO,SLOW", encoding='utf-8')
+                                m_per = 1
+                            elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ":
+                                instr.write("ROUT:FREQ", encoding='utf-8')
+                                instr.write("ROUT:CHAN "+str(int(i))+","+on_off+",FRQ,AUTO,SLOW", encoding='utf-8')
+                                m_per = 0
+                            elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
+                                instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                                w_t = 4
+                            elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "DIO":
+                                instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                                w_t = 5
+                            elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "CAP":
+                                instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                                w_t = 4
+                        elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "TEMP" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "FRQ" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "DIO" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "CAP":
+                            instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
+                    elif i >= 13:
+                        instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",2A,SLOW", encoding='utf-8')
+            instr.write("ROUTe:DEL MIN", encoding='utf-8')
             instr.write("ROUT:LIMI:LOW 1", encoding='utf-8')
             instr.write("ROUT:LIMI:HIGH 16", encoding='utf-8')
-            instr.write("ROUTe:DEL MIN", encoding='utf-8')
             instr.write("ROUTe:STARt ON", encoding='utf-8')
-            self.warte(25, 20)
+            self.warte(30, 20,"CH 01...16")
+            for i in range (1,13):
+                if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
 
-            for i in range (1,17):
-                self.dbText.setVisible(True)
-                self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
-                dummy = instr.ask("ROUTe:DATA? "+str(i), encoding='utf-8')
-                dummy = dummy.replace(',', '')
-                dummy = dummy.replace('  ', ' ')
-                dummy_1 = dummy.split(' ')
-                dummy_1[1] = dummy_1[1].replace('OHM', 'Ω')
-                dummy_1[1] = dummy_1[1].replace('HZ', 'Hz')
-                dummy_1[1] = dummy_1[1].replace('S', 's')
-                wert = round(float(dummy_1[0]), 12)
-                if getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
-                    wert = 1/wert
-                    dummy_1[1] = 's'
-                dummy_a = list(self.check_wert(wert))
-                fo_string = komma[2].format(wert*dummy_a[1])
-                if len(dummy_1) == 3:
-                    if "C" in dummy_1[2]:
-                        dummy_1[1] = '°C  '
-                    if "F" in dummy_1[2]  and dummy_a[0] == "":
-                        dummy_1[1] = '°F  '
-                    elif "F" in dummy_1[2]:
-                        dummy_1[1] = 'F'
-                    if "K" in dummy_1[2]:
-                        dummy_1[1] = 'K   '
-                if wert >= 9.9E+34:
-                    self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
-                    fo_string = "Overload"
-                    dummy_1[1] = ""
-                    dummy_a[0] = ""
-                if wert >= 9.9E+37:
-                    self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
-                    fo_string = "Open"
-                    dummy_1[1] = ""
-                    dummy_a[0] = ""
-                dummy_1[1] = str(dummy_a[0])+str(dummy_1[1]).ljust(3, ' ')
-                if len(dummy_1[1]) == 3:
-                    dummy_1[1] = dummy_1[1]+ " "
-                if getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC":
-                    getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" "+dummy_1[1])
-                    self.lcdNumber.setText(fo_string)
-                    self.lcdText1.setText(dummy_1[1])
-                    self.dbText.setText("Channel "+ str(i))
-                    m_per = 0
-                    instr.write("ROUT:FREQ", encoding='utf-8')
-                elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
-                    m_ntc = 0
-                    ntc = self.temp_ntc(wert/1000)
-                    fo_string = komma[2].format(ntc)
-                    getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" °C  ")
-                    self.lcdNumber.setText(fo_string)
-                    self.lcdText1.setText(" °C")
-                    self.dbText.setText("Channel "+ str(i))
+                    self.dbText.setVisible(False)
+                    self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
+                    dummy = instr.ask("ROUTe:DATA? "+str(i), encoding='utf-8')
+                    dummy = dummy.replace(',', '')
+                    dummy = dummy.replace('  ', ' ')
+                    dummy_1 = dummy.split(' ')
+                    dummy_1[1] = dummy_1[1].replace('OHM', 'Ω')
+                    dummy_1[1] = dummy_1[1].replace('HZ', 'Hz')
+                    dummy_1[1] = dummy_1[1].replace('S', 's')
+                    wert = round(float(dummy_1[0]), 15)
+                    if getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
+                        wert = 1/wert
+                        dummy_1[1] = 's'
+                    dummy_a = list(self.check_wert(wert))
+                    fo_string = komma[0].format(wert*dummy_a[1])
+                    if len(dummy_1) == 3:
+                        if "C" in dummy_1[2]:
+                            dummy_1[1] = '°C  '
+                        if "F" in dummy_1[2]  and dummy_a[0] == "":
+                            dummy_1[1] = '°F  '
+                        elif "F" in dummy_1[2]:
+                            dummy_1[1] = 'F'
+                        if "K" in dummy_1[2]:
+                            dummy_1[1] = 'K   '
+                    if wert >= 9.9E+34:
+#                        self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
+                        fo_string = "Overload"
+                        dummy_1[1] = ""
+                        dummy_a[0] = ""
+                    if wert >= 9.9E+37:
+#                        self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
+                        fo_string = "Open"
+                        dummy_1[1] = ""
+                        dummy_a[0] = ""
+                    dummy_1[1] = str(dummy_a[0])+str(dummy_1[1]).ljust(3, ' ')
+                    if len(dummy_1[1]) == 3:
+                        dummy_1[1] = dummy_1[1]+ " "
+                    if getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC":
+                        getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" "+dummy_1[1])
+                        m_per = 0
+                        instr.write("ROUT:FREQ", encoding='utf-8')
+                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
+                        m_ntc = 0
+                        ntc = self.temp_ntc(wert/1000)
+                        fo_string = komma[0].format(ntc)
+                        getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" °C  ")
+                elif getattr(self, "CH_checkBox_" + str(i)).isChecked() == False:
+                    getattr(self, "CH_lcd_Button_" + str(i)).setText("-.----- ----")
+            self.lcdDual.setText("Scanning CH13...CH16")
+            instr.write("ROUTe:DEL MIN", encoding='utf-8')
+            instr.write("ROUTe:STARt OFF", encoding='utf-8')
+            instr.write("ROUT:LIMI:LOW 13", encoding='utf-8')
+            instr.write("ROUT:LIMI:HIGH 16", encoding='utf-8')
+            instr.write("ROUTe:STARt ON", encoding='utf-8')
+            self.warte(10,20,"CH 13...16")
+            self.lcdNumber.setText("-.-----")
+            self.lcdText1.setText(" --")
+            instr.write("ROUTe:STARt OFF", encoding='utf-8')
+            for i in range (13,17):
+                if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
+
+                    self.dbText.setVisible(False)
+                    self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
+                    dummy = instr.ask("ROUTe:DATA? "+str(i), encoding='utf-8')
+                    dummy = dummy.replace(',', '')
+                    dummy = dummy.replace('  ', ' ')
+                    dummy_1 = dummy.split(' ')
+                    dummy_1[1] = dummy_1[1].replace('OHM', 'Ω')
+                    dummy_1[1] = dummy_1[1].replace('HZ', 'Hz')
+                    dummy_1[1] = dummy_1[1].replace('S', 's')
+                    wert = round(float(dummy_1[0]), 15)
+                    if getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
+                        wert = 1/wert
+                        dummy_1[1] = 's'
+                    dummy_a = list(self.check_wert(wert))
+                    fo_string = komma[0].format(wert*dummy_a[1])
+                    if len(dummy_1) == 3:
+                        if "C" in dummy_1[2]:
+                            dummy_1[1] = '°C  '
+                        if "F" in dummy_1[2]  and dummy_a[0] == "":
+                            dummy_1[1] = '°F  '
+                        elif "F" in dummy_1[2]:
+                            dummy_1[1] = 'F'
+                        if "K" in dummy_1[2]:
+                            dummy_1[1] = 'K   '
+                    if wert >= 9.9E+34:
+                        self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
+                        fo_string = "Overload"
+                        dummy_1[1] = ""
+                        dummy_a[0] = ""
+                    if wert >= 9.9E+37:
+                        self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
+                        fo_string = "Open"
+                        dummy_1[1] = ""
+                        dummy_a[0] = ""
+                    dummy_1[1] = str(dummy_a[0])+str(dummy_1[1]).ljust(3, ' ')
+                    if len(dummy_1[1]) == 3:
+                        dummy_1[1] = dummy_1[1]+ " "
+                    if getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC":
+                        getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" "+dummy_1[1])
+                        m_per = 0
+                        instr.write("ROUT:FREQ", encoding='utf-8')
+                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
+                        m_ntc = 0
+                        ntc = self.temp_ntc(wert/1000)
+                        fo_string = komma[0].format(ntc)
+                        getattr(self, "CH_lcd_Button_" + str(i)).setText(fo_string+" °C  ")
+                elif getattr(self, "CH_checkBox_" + str(i)).isChecked() == False:
+                    getattr(self, "CH_lcd_Button_" + str(i)).setText("-.----- ----")
 
             if sa_flag == 1:
                 w_wert = 2
@@ -685,15 +781,25 @@ class Ui(QtWidgets.QMainWindow):
                 worksheet.write(wb_row, 0, now, format_date)
                 worksheet.write(wb_row, 1, now, format_time)
                 for i in range (1,17):
-                    full_txt = getattr(self, "CH_lcd_Button_" + str(i)).text()
-                    full_txt = full_txt.split(' ')
-                    if full_txt[0] != "Open":
-                        worksheet.write(wb_row, w_wert, float(full_txt[0]))
-                    if len(full_txt) >= 2:
-                        worksheet.write(wb_row, w_einheit, full_txt[1])
-                    worksheet.write(0, w_einheit, getattr(self, "CH_comboBox_" + str(i)).currentText())
-                    w_wert += 2
-                    w_einheit += 2
+                    if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
+                        full_txt = getattr(self, "CH_lcd_Button_" + str(i)).text()
+                        full_txt = full_txt.split(' ')
+                        if "Open" not in full_txt[0] and "-.-----" not in full_txt[0]:
+                            worksheet.write(wb_row, w_wert, float(full_txt[0]))
+                        if len(full_txt) >= 2:
+                            worksheet.write(0, w_einheit, getattr(self, "CH_comboBox_" + str(i)).currentText())
+                            worksheet.write(wb_row, w_einheit, full_txt[1])
+                        w_wert += 2
+                        w_einheit += 2
+                    elif getattr(self, "CH_checkBox_" + str(i)).isChecked() == False:
+                        full_txt = getattr(self, "CH_lcd_Button_" + str(i)).text()
+                        full_txt = full_txt.split(' ')
+                        worksheet.write(wb_row, w_wert, 0.00000)
+                        if len(full_txt) >= 2:
+                            worksheet.write(0, w_einheit, getattr(self, "CH_comboBox_" + str(i)).currentText())
+                        w_wert += 2
+                        w_einheit += 2
+                        
                 wb_row += 1
 
             if DC_filter == 0:
@@ -713,6 +819,7 @@ class Ui(QtWidgets.QMainWindow):
             instr.write(funktion_set, encoding='utf-8')
             instr.write("TRIGger:DELay:AUTO ON", encoding='utf-8')
             self.SCconfig_Button.setVisible(True)
+            self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 60))
 
     def scanner_loop(self):
         global sa_intervall, scan_timer, scan_loop_toggle, scan_loop, scanner_run, scanner_on, scanner_auswahl, scanner_auswahl_i, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
@@ -724,7 +831,7 @@ class Ui(QtWidgets.QMainWindow):
             check_loop = 1
             self.SCloop_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
             self.SCloop_all_Button.setVisible(False)
-            self.SCrun_Button.setVisible(False)
+            self.SCrun_Button.setVisible(True)
             self.SCrun()
         elif scan_loop >= 1 and check_loop == 0:
             scanner_run = 0
@@ -756,7 +863,7 @@ class Ui(QtWidgets.QMainWindow):
             self.SCloop_all_Button.setVisible(True)
             self.SCrun_Button.setVisible(True)
 
-    def warte(self, zeit_s, i):
+    def warte(self, zeit_s, i, b_text):
         global scan_timer, scan_loop_toggle, check_loop, scanner_run, scan_loop, save_timer, save_intervall, save_start
         i_ein = i
         now = datetime.now()
@@ -787,9 +894,14 @@ class Ui(QtWidgets.QMainWindow):
                     self.scanner_widget.repaint()
                     self.frame.repaint()
                     save_loop += 1
+                    if shot == 1:
+                        instr.write("SCDP")
+                        self.result_str = instr.read_raw()
+                        self.pixmap.loadFromData(self.result_str)
+                        self.screenshot.setPixmap(self.pixmap)
                 if save_loop >= zeit_s:
                     self.SCrun_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
-                    self.SCrun_Button.setVisible(False)
+#                    self.SCrun_Button.setVisible(False)
                     break
         elif i_ein == 20:
             while True:
@@ -799,7 +911,10 @@ class Ui(QtWidgets.QMainWindow):
                     self.scanner_widget.repaint()
                     check_loop = 0
                     save_start = int(round(time.time())) + save_intervall
-                    self.SCrun_Button.setProperty("text","CH 01..16\n"+str(int(zeit_s - save_loop)) + " s")
+                    self.SCrun_Button.setProperty("text",b_text+"\n"+str(int(zeit_s - save_loop)) + " s")
+                    self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
+                    self.lcdNumber.setText("Countdown: "+ str(int(zeit_s - save_loop)))
+                    self.lcdText1.setText("s")
                     self.scanner_widget.repaint()
                     if scan_loop == 2:
                         self.SCloop_Button.setProperty("text","Scanner Loop\n"+str(int(scan_timer - save_timer)) + " s")
@@ -963,8 +1078,23 @@ class Ui(QtWidgets.QMainWindow):
             self.PTC_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
             check_loop = 1
             ntc_switch = 0
+            self.F1_Button.setVisible(True)
+            self.PTC_Button.setVisible(False)
             self.lcdDual.setVisible(False)
             self.res()
+
+    def runstop(self):
+        global run_stop, check_loop
+        if run_stop == 1 and check_loop == 0:
+            self.run_stop_Button.setText("STOP")
+            self.run_stop_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
+            run_stop = 0
+            check_loop = 1
+        if ntc_switch == 0 and check_loop == 0:
+            self.run_stop_Button.setText("RUN")
+            self.run_stop_Button.setStyleSheet("background-color: #5a5a5a; color: #00aa00;")
+            run_stop = 1
+            check_loop = 1
 
     def temp_ntc(self, wert_temp):
         ntcNominal = 10000  #         // Widerstand des NTC bei Nominaltemperatur
@@ -1231,7 +1361,7 @@ class Ui(QtWidgets.QMainWindow):
         null_switch = 0
 
     def get_funktion(self):
-        global db_switch, db_bak, null_ref, null_switch, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, CAP_display, DC_filter, iz_filter, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, wert
+        global check_loop, run_stop, db_switch, db_bak, null_ref, null_switch, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, CAP_display, DC_filter, iz_filter, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, wert
         if dot_on == 0:
             dot_on = 1
             self.LCD_Dot.setProperty("text", "●") # ● ◉ █
@@ -1427,12 +1557,9 @@ class Ui(QtWidgets.QMainWindow):
                 funktion="A AC"
             self.F1_Button.setProperty("text"," ")
             self.F2_Button.setProperty("text","")
-            if DC_filter == 0:
-                self.F3_Button.setProperty("text","Filter Off\nOn")
-                self.F3_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
-            elif DC_filter == 1:
-                self.F3_Button.setProperty("text","Filter On\nOff")
-                self.F3_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
+            self.F2_Button.setProperty("text","")
+            self.F3_Button.setProperty("text"," ")
+            self.F4_Button.setProperty("text"," ")
         elif funktion == "TEMP":
             mess_art = 'Temperature'
             self.dial.setRange(0,9)
@@ -1443,7 +1570,9 @@ class Ui(QtWidgets.QMainWindow):
             funktion = "°"+temp_unit
             if temp_unit == 'K':
                 funktion=temp_unit
+            self.F1_Button.setVisible(False)
             self.F1_Button.setProperty("text"," ")
+            self.PTC_Button.setVisible(True)
             self.F2_Button.setProperty("text","Unit\n°C")
             self.F3_Button.setProperty("text","Unit\n°F")
             self.F4_Button.setProperty("text","Unit\nK")
@@ -1482,7 +1611,9 @@ class Ui(QtWidgets.QMainWindow):
             elif bereich_raw == 100000000.0:
                 nk = 2
                 funktion="MΩ"
+            self.F1_Button.setVisible(False)
             self.F1_Button.setProperty("text"," ")
+            self.PTC_Button.setVisible(True)
             self.F2_Button.setProperty("text","")
             self.F3_Button.setProperty("text"," ")
             self.F4_Button.setProperty("text"," ")
@@ -1875,7 +2006,7 @@ class Ui(QtWidgets.QMainWindow):
                 self.l_limit_calc_num.setProperty("text", str(low_fail))
 
     def update(self):
-        global G_timer, G_intervall, G_start, scan_timer, scan_loop_toggle, scan_loop, wert_limit, wert_raw, limit_switch, limit_disable, low_fail, up_fail, upper, lower, upper_val, lower_val, db_switch, db_bak, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
+        global run_stop, G_timer, G_intervall, G_start, scan_timer, scan_loop_toggle, scan_loop, wert_limit, wert_raw, limit_switch, limit_disable, low_fail, up_fail, upper, lower, upper_val, lower_val, db_switch, db_bak, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
         now = datetime.now()
         save_timer = int(round(time.time()))
         G_timer = int(round(time.time()))
@@ -1883,7 +2014,7 @@ class Ui(QtWidgets.QMainWindow):
             self.f1_click()
             f1_start = 0
         self.timer_single.stop()
-#        now = datetime.now()
+        now = datetime.now()
         timestamp = "%02d:%02d:%02d" % (now.hour, now.minute, now.second)
         self.get_funktion()
         if cold_boot == 0 and funktion_raw != mess_alt and graph == 1:
@@ -2081,7 +2212,7 @@ class Ui(QtWidgets.QMainWindow):
             self.screenshot.setPixmap(self.pixmap)
 
         check_loop = 0
-        self.timer_single.start(1)
+        self.timer_single.start(0)
 
 EXIT_CODE_REBOOT = -11231351
 def ende():
