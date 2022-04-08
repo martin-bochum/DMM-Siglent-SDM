@@ -838,7 +838,8 @@ class Ui(QtWidgets.QMainWindow):
     def scanner_loop(self):
         global sa_intervall, scan_timer, scan_loop_toggle, scan_loop, scanner_run, scanner_on, scanner_auswahl, scanner_auswahl_i, ntc_wert, ntc_switch, f1_start, null_ref, null_switch, shot, check_loop, cold_boot, HOST, PORT, SCREEN, SN_SHOW, VDC, VAC, AC, AAC, RES, RES_display, TEMP_RDT_TYPE, CAP, DC_filter, iz_filter, leer, scan_text, funktion, bereich, bereich_raw, dot_on, funktion_raw, funktion_set, rad, komma, komma_plus, nk, mess_alt, x, y, messungen, graph, xy_counter, datetimes, pen, max_mess, min_mess, mess_art, scanner, wert
         if scan_loop == 0 and check_loop == 0:
-            self.intervall_box.setCurrentIndex(1)
+            if self.intervall_box.currentIndex() == 0:
+                self.intervall_box.setCurrentIndex(1)
             self.save_change()
             now = datetime.now()
             scan_timer = int(round(time.time())) + sa_intervall
