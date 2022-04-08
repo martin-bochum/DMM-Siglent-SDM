@@ -443,6 +443,7 @@ class Ui(QtWidgets.QMainWindow):
         self.intervall_box.setVisible(False)
         self.Save_Button.setVisible(False)
         self.SCrun_Button.setVisible(True)
+        self.offsetText.setVisible(False)
         self.null_off()
         aci_first = 0
         skip = 0
@@ -616,6 +617,7 @@ class Ui(QtWidgets.QMainWindow):
         self.Save_Button.setVisible(False)
         self.SCrun_Button.setVisible(True)
         self.null_off()
+        self.offsetText.setVisible(False)
         self.SCconfig_Button.setVisible(False)
         if scanner_run == 0:
             if DC_filter == 0:
@@ -628,7 +630,7 @@ class Ui(QtWidgets.QMainWindow):
             self.lcdText1.setText(" --")
             instr.write("ROUTe:SCAN ON", encoding='utf-8')
             instr.write(TEMP_SET, encoding='utf-8')
-            instr.write("ROUTe:FUNC STEP", encoding='utf-8')
+            instr.write("ROUTe:FUNC SCAN", encoding='utf-8')
             instr.write("ROUTe:COUN 1", encoding='utf-8')
             instr.write("ROUTe:FREQuency:APERture 1", encoding='utf-8')
             instr.write("ROUTe:PERiod:APERture 1", encoding='utf-8')
@@ -887,9 +889,13 @@ class Ui(QtWidgets.QMainWindow):
         save_loop = 0
         self.SCrun_Button.setVisible(True)
         self.SCrun_Button.setStyleSheet("background-color: #5a5a5a; color: #aa0000;")
-        ping_pong =" ▻ ▻        "
         ze = 2
-        if i_ein < 20:
+        if i_ein < 20 and i_ein != 17:
+            ping_pong ="▻ ▻      "
+            ba1 = ["█", "▇", "▅", "▃", "▁"]
+            zwso = ""
+            zwso = getattr(self, "CH_Text_" + str(i_ein)).text()
+            getattr(self, "CH_Text_" + str(i_ein)).setStyleSheet("background-color: #ffffff; color: #000000;")
             while True:
                 now = datetime.now()
                 save_timer = int(round(time.time()))
@@ -904,8 +910,9 @@ class Ui(QtWidgets.QMainWindow):
                     self.lcdDual.setText("Scanning Channel "+str(i)+" "+getattr(self, "CH_comboBox_" + str(i)).currentText())
                     if scan_loop == 1:
                         self.SCloop_Button.setProperty("text","Scanner Loop\n"+str(int(scan_timer - save_timer)) + " s")
-                    getattr(self, "CH_lcd_Button_" + str(i_ein)).setText(ping_pong)
-                    ping_pong = ping_pong[0:int(12-ze)]
+                    zws = zwso+" "+ba1[int(zeit_s - save_loop)-1]
+                    getattr(self, "CH_Text_" + str(i_ein)).setText(zws)
+                    ping_pong = ping_pong[0:int(9-ze)]
                     ze += 2
                     self.scanner_widget.repaint()
                     self.frame.repaint()
@@ -917,6 +924,8 @@ class Ui(QtWidgets.QMainWindow):
                         self.screenshot.setPixmap(self.pixmap)
                 if save_loop >= zeit_s:
                     self.SCrun_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
+                    getattr(self, "CH_Text_" + str(i_ein)).setStyleSheet("background-color: #000000; color: #ffffff;")
+                    getattr(self, "CH_Text_" + str(i_ein)).setText(zwso)
                     if getattr(self, "CH_comboBox_" + str(i)).currentText() == "ACI" and aci_first == 0:
                         instr.write("ROUTe:STARt OFF", encoding='utf-8')
                         aci_first = 1
@@ -1548,7 +1557,6 @@ class Ui(QtWidgets.QMainWindow):
             self.F2_Button.setProperty("text","")
             self.F3_Button.setProperty("text"," ")
             self.F4_Button.setProperty("text"," ")
-            self.F6_Button.setProperty("text","Rel.\nOff")
         elif funktion == "PER":
             mess_art = 'Period'
             nk = 0
