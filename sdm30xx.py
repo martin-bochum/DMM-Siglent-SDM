@@ -119,7 +119,7 @@ except IndexError:
 instr=vxi11.Instrument(HOST)
 instr.timeout = 60*1000
 # instr.write("*RST; *CLS", encoding='utf-8')
-instr.write("TRIGGER:SOURCE IMMEDIATE;TRIGGER:COUNT 1;SAMPLE:COUNT 1", encoding='utf-8')
+instr.write("TRIGGER:SOURCE IMMEDIATE;TRIGGER:COUNT 1;SAMPLE:COUNT 1;TRIG:DEL:AUTO 1", encoding='utf-8')
 print ('Set Date:' + time.strftime('%Y-%m-%d'))
 print ('Set Time:' + time.strftime('%H:%M:%S'))
 instr.write(':SYST:DATE ' + time.strftime('%Y%m%d'))
@@ -456,6 +456,7 @@ class Ui(QtWidgets.QMainWindow):
             if DC_filter == 0:
                 instr.write("VOLT:FILT ON", encoding='utf-8')
             instr.write("CONF:VOLT", encoding='utf-8')
+            instr.write("TRIG:DEL:AUTO 1", encoding='utf-8')
             instr.write("ROUTe:SCAN ON", encoding='utf-8')
             instr.write(TEMP_SET, encoding='utf-8')
 #            instr.write("ROUTe:FREQuency:APERture 0.1", encoding='utf-8')
@@ -473,16 +474,18 @@ class Ui(QtWidgets.QMainWindow):
                 instr.write("ROUT:LIMI:HIGH "+str(i), encoding='utf-8')
                 m_ntc = 0
                 m_per = 0
-                w_t = 3
+                w_t = 5
                 n_c = i+1
                 on_off = "OFF"
                 if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
                     on_off = "ON"
                 if i <= 12:
-                    if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ":
+                    if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "FRQ" or getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
                         if getattr(self, "CH_comboBox_" + str(i)).currentText() == "NTC":
                             instr.write("ROUT:CHAN "+str(int(i))+","+on_off+",2W,AUTO,SLOW", encoding='utf-8')
                             m_ntc = 1
+                        elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "TEMP":
+                            instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
                         elif getattr(self, "CH_comboBox_" + str(i)).currentText() == "PER":
                             instr.write("ROUT:PER", encoding='utf-8')
                             instr.write("ROUT:CHAN "+str(int(i))+","+on_off+",FRQ,AUTO,SLOW", encoding='utf-8')
@@ -491,23 +494,19 @@ class Ui(QtWidgets.QMainWindow):
                             instr.write("ROUT:FREQ", encoding='utf-8')
                             instr.write("ROUT:CHAN "+str(int(i))+","+on_off+",FRQ,AUTO,SLOW", encoding='utf-8')
                             m_per = 0
-                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "FRQ":
+                    elif getattr(self, "CH_comboBox_" + str(i)).currentText() != "PER" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "NTC" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "FRQ" and getattr(self, "CH_comboBox_" + str(i)).currentText() != "TEMP":
                             instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",AUTO,SLOW", encoding='utf-8')
                 elif i >= 13:
                     instr.write("ROUT:CHAN "+str(int(i))+","+on_off+","+getattr(self, "CH_comboBox_" + str(i)).currentText()+",2A,SLOW", encoding='utf-8')
                 if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
+                    if i >= 2 and getattr(self, "CH_checkBox_" + str(i-1)).isChecked() == False:
+                        w_t = 6
                     instr.write("ROUTe:DEL MIN", encoding='utf-8')
                     instr.write("ROUT:LIMI:LOW "+str(i), encoding='utf-8')
                     instr.write("ROUT:LIMI:HIGH "+str(i), encoding='utf-8')
                     instr.write("ROUTe:STARt ON", encoding='utf-8')
-                    if skip == 0:
-                        self.warte(5, i," ")        # w_t
-                    elif skip == 1:
-                        self.warte(5, i," ")
+                    self.warte(w_t, i," ")
                     instr.write("ROUTe:STARt OFF", encoding='utf-8')
-                    skip = 0
-                elif getattr(self, "CH_checkBox_" + str(i)).isChecked() == False:
-                    skip = 1
                 self.dbText.setVisible(True)
                 self.lcdNumber.setFont(QFont('DejaVu Sans Mono', 36))
                 if getattr(self, "CH_checkBox_" + str(i)).isChecked() == True:
@@ -893,13 +892,14 @@ class Ui(QtWidgets.QMainWindow):
         ze = 2
         if i_ein < 20 and i_ein != 17:
             ping_pong ="▻ ▻      "
-            ba1 = ["█", "▇", "▅", "▃", "▁"]
+            ba1 = ["█", "▇", "▆", "▅", "▄", "▃", "▂", "▁"]
             zwso = ""
             zwso = getattr(self, "CH_Text_" + str(i_ein)).text()
             getattr(self, "CH_Text_" + str(i_ein)).setStyleSheet("background-color: #ffffff; color: #000000;")
             while True:
                 now = datetime.now()
                 save_timer = int(round(time.time()))
+                sleep(0.333)
                 if save_timer >= save_start:
                     self.scanner_widget.repaint()
                     check_loop = 0
@@ -911,7 +911,7 @@ class Ui(QtWidgets.QMainWindow):
                     self.lcdDual.setText("Scanning Channel "+str(i)+" "+getattr(self, "CH_comboBox_" + str(i)).currentText())
                     if scan_loop == 1:
                         self.SCloop_Button.setProperty("text","Scanner Loop\n"+str(int(scan_timer - save_timer)) + " s")
-                    zws = zwso+" "+ba1[int(zeit_s - save_loop)-1]
+                    zws = zwso+" "+ba1[int(zeit_s - save_loop)-(zeit_s-7)]
                     getattr(self, "CH_Text_" + str(i_ein)).setText(zws)
                     ping_pong = ping_pong[0:int(9-ze)]
                     ze += 2
@@ -940,6 +940,7 @@ class Ui(QtWidgets.QMainWindow):
             while True:
                 now = datetime.now()
                 save_timer = int(round(time.time()))
+                sleep(0.333)
                 if save_timer >= save_start:
                     self.scanner_widget.repaint()
                     check_loop = 0
