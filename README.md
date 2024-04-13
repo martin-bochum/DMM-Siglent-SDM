@@ -5,7 +5,7 @@ Linux / Debian / RaspiOS
 
 Siglent SDM3055, SDM3055-SC<br>
 
-read <font size="3"><a href="https://github.com/martin-bochum/DMM-Siglent-SDM/edit/main/README" target="_blank" >README</a> !
+read <font size="3"><a href="https://github.com/martin-bochum/DMM-Siglent-SDM/README" target="_blank" >README</a> !
 <br>
 Video: <font size="3"><a href="http://martin-bochum.de/Cloud/Siglent-SDM3055-SC.m4v" target="_blank" >SC-Card in action</a>
 <br>
