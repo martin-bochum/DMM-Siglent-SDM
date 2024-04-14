@@ -38,8 +38,12 @@ sudo reboot    # or
 exit           # restart over DESKTOP.
 -------------------------------------------
 Step 2. Check Software
+
+open Console:
+
 cd ~/DMM-Siglent-SDM
 python3 sdm30xx.py
+python3 sdm30xx_time.py     # only working with DEBIAN 11, Graphics ON, x is Time not Measurements 
 
 ###################################################
 #####  If group of /dev/usbtmc is not dialout #####
