@@ -1602,14 +1602,23 @@ class Ui(QtWidgets.QMainWindow):
             self.F4_Button.setProperty("text"," ")
         elif funktion == "TEMP":
             mess_art = 'Temperature'
+            self.F2_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
+            self.F3_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
+            self.F4_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
             self.dial.setRange(0,9)
             self.dial.setProperty("toolTip", "Sensor " + str(TEMP_RDT_TYPE))
             self.lcd_dial.setProperty("text", TEMP_RDT_TYPE[int(self.dial.value())])
             bereich = TEMP_RDT_TYPE[int(self.dial.value())]
             temp_unit = instr.ask("UNIT:TEMPerature?", encoding='utf-8')
-            funktion = "°"+temp_unit
-            if temp_unit == 'K':
+            if temp_unit == 'C':
+                funktion="°"+temp_unit
+                self.F2_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
+            elif temp_unit == 'F':
+                funktion="°"+temp_unit
+                self.F3_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
+            elif temp_unit == 'K':
                 funktion=temp_unit
+                self.F4_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
 #            self.F1_Button.setVisible(False)
             self.F1_Button.setProperty("text"," ")
 #            self.PTC_Button.setVisible(True)
