@@ -173,6 +173,7 @@ class Ui(QtWidgets.QMainWindow):
         self.F6_Button.setProperty("text"," ")
         self.F6_Button.clicked.connect(self.f6_click)
         self.SCShot_Button.clicked.connect(self.scshot)
+        self.SCShot_Button.setFont(QFont('Noto Sans', 8))
         self.SCShot_Button.setProperty("text","Live SC-Shot\nOn")
         self.SCShot_Button.setProperty("toolTip", "Screenshot On OFF")
 
@@ -361,10 +362,12 @@ class Ui(QtWidgets.QMainWindow):
         self.screenshot.setPixmap(self.pixmap)
         
         if SC_card == "YES":
+            self.SC_Button.setFont(QFont('Noto Sans', 8))
             self.SC_Button.setVisible(True)
             self.SC_Button.clicked.connect(self.multi)
         elif SC_card == "NO":
-            self.SC_Button.setVisible(True)
+            self.SC_Button.setFont(QFont('Noto Sans', 8))
+            self.SC_Button.setVisible(false)
             self.SC_Button.clicked.connect(self.multi)
             self.intervall_box.setVisible(False)
             self.Save_Button.setVisible(False)
@@ -1061,6 +1064,7 @@ class Ui(QtWidgets.QMainWindow):
         global shot, graph, scanner
         if shot == 0:
             shot = 1
+            self.SCShot_Button.setFont(QFont('Noto Sans', 8))
             self.SCShot_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
             self.SCShot_Button.setProperty("text","Live SC-Shot\nOff")
             self.setFixedSize(1262, 304)        # breit mit SC
@@ -1078,6 +1082,7 @@ class Ui(QtWidgets.QMainWindow):
                 self.setFixedSize(1262, 304)
         elif shot == 1:
             shot = 0
+            self.SCShot_Button.setFont(QFont('Noto Sans', 8))
             self.SCShot_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
             self.SCShot_Button.setProperty("text","Live SC-Shot\nOn")
             self.setFixedSize(766, 304)         # klein ohne SC
@@ -1149,6 +1154,7 @@ class Ui(QtWidgets.QMainWindow):
         global graph, scanner, shot
         if scanner == 0:
             scanner = 1
+            self.SC_Button.setFont(QFont('Noto Sans', 8))
             self.SC_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
             self.scanner_widget.setVisible(True)
             self.graph_frame.setVisible(False)
@@ -1175,6 +1181,7 @@ class Ui(QtWidgets.QMainWindow):
             scanner = 0
             self.scanner_widget.setVisible(False)
             self.graph_frame.setVisible(True)
+            self.SC_Button.setFont(QFont('Noto Sans', 8))
             self.SC_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
             if graph == 1 and shot == 1:
                 self.setFixedSize(1262, 776)
