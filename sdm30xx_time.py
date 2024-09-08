@@ -286,7 +286,7 @@ class Ui(QtWidgets.QMainWindow):
         self.SCconfig_Button.clicked.connect(self.config_write_channals)
         self.SCconfig_Button.setText("Save all Mode\nSettings")
         self.SCconfig_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
-#        self.SCrun_Button.setFont(QFont('Noto Sans', 7))
+        self.SCrun_Button.setFont(QFont('Noto Sans', 8))
         self.SCrun_Button.setProperty("text","Scanner ON")
         self.SCrun_Button.clicked.connect(self.SCrun)
         self.SCloop_Button.setFont(QFont('Noto Sans', 7))
@@ -296,6 +296,7 @@ class Ui(QtWidgets.QMainWindow):
         self.SCloop_all_Button.setProperty("text","Scanner Loop\nAll FAST")
         self.SCloop_all_Button.clicked.connect(self.scanner_loop_all)
 
+        self.intervall_box.setFont(QFont('Noto Sans', 8))
         self.intervall_box.addItem('60 s')
         self.intervall_box.addItem('120 s')
         self.intervall_box.addItem('240 s')
@@ -307,10 +308,12 @@ class Ui(QtWidgets.QMainWindow):
         self.intervall_box.currentIndexChanged.connect(self.save_change)
         self.intervall_box.setStyleSheet("color: white; background-color: #5a5a5a; selection-background-color: blue;")
 
+        self.Save_Button.setFont(QFont('Noto Sans', 8))
         self.Save_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
         self.Save_Button.clicked.connect(self.save)
         self.Save_Button.setProperty("toolTip", "Save Scan to Excel/LibreOffice File")
         
+        self.G_intervall_box.setFont(QFont('Noto Sans', 8))
         self.G_intervall_box.addItem('0 s')
         self.G_intervall_box.addItem('1 s')
         self.G_intervall_box.addItem('5 s')
@@ -334,6 +337,7 @@ class Ui(QtWidgets.QMainWindow):
         self.textEdit.setStyleSheet("background-color: #464646; color: #ffffff;")
         self.Clear_Button.clicked.connect(self.clear)
         self.Clear_Button.setText("Clear Text")
+        self.t_Save_Button.setFont(QFont('Noto Sans', 8))
         self.t_Save_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
         self.t_Save_Button.setText("Save CSV")
         self.t_Save_Button.clicked.connect(self.t_save)
