@@ -9,10 +9,10 @@ from datetime import datetime
 from numpy import*
 import numpy as np
 import os
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6 import QtCore, QtGui, QtWidgets, uic
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 import socket, errno
 from pyqtgraph import PlotWidget
 import pyqtgraph as pg
@@ -2301,7 +2301,7 @@ def main():
         except RuntimeError: app = QApplication.instance()
         app.aboutToQuit.connect(ende)
         window = Ui()
-        exitCode = app.exec_()
+        exitCode = app.exec()
         if exitCode != EXIT_CODE_REBOOT: break
     return exitCode
 

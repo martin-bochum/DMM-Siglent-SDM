@@ -1,3 +1,42 @@
+Step 1. Install software and dependencies for Debian 12 and raspios-bookworm (only tested with raspios !)
+
+open Console:
+
+sudo apt-get install git
+
+git clone https://github.com/martin-bochum/DMM-Siglent-SDM
+
+cd ~/DMM-Siglent-SDM
+
+sudo apt-get install qtcreator
+sudo apt-get install pyqt6-dev-tools
+sudo apt-get install python3-usb
+sudo apt-get install python3-xlswriter
+sudo apt-get install python3-pyqtgraph
+sudo apt-get install python3-numpy
+sudo apt-get install pipx
+pipx install python-vxi11
+
+copy Folder 
+~/.local/pipx/venvs/python-vxi11/lib/python3.11/site-packages/vxi11
+... to Your DMM-Siglent-SDM directory
+
+qtcreator sdm30xx_V3.ui
+...and save without changes !
+
+nano multimeter.ini
+
+cd /var/cache/apt/archives
+ls -l *.deb
+sudo rm *.deb
+sudo reboot    # or
+exit           # restart over DESKTOP.
+
+cd ~/DMM-Siglent-SDM
+python3 sdm30xx_time_qt6.py
+
+------------------------
+
 Step 1. Install software and dependencies for Debian 11 and raspios-bullseye:
 
 open Console:
@@ -44,6 +83,7 @@ open Console:
 cd ~/DMM-Siglent-SDM
 python3 sdm30xx.py
 python3 sdm30xx_time.py     # only working with DEBIAN 11, Graphics ON, x is Time not Measurements 
+python3 sdm30xx_time_qt6.py # only working with DEBIAN 12 Bookworm
 
 ###################################################
 #####  If group of /dev/usbtmc is not dialout #####

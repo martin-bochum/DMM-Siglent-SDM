@@ -173,6 +173,7 @@ class Ui(QtWidgets.QMainWindow):
         self.F6_Button.setProperty("text"," ")
         self.F6_Button.clicked.connect(self.f6_click)
         self.SCShot_Button.clicked.connect(self.scshot)
+        self.SCShot_Button.setFont(QFont('Noto Sans', 8))
         self.SCShot_Button.setProperty("text","Live SC-Shot\nOn")
         self.SCShot_Button.setProperty("toolTip", "Screenshot On OFF")
 
@@ -286,7 +287,7 @@ class Ui(QtWidgets.QMainWindow):
         self.SCconfig_Button.clicked.connect(self.config_write_channals)
         self.SCconfig_Button.setText("Save all Mode\nSettings")
         self.SCconfig_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
-#        self.SCrun_Button.setFont(QFont('Noto Sans', 7))
+        self.SCrun_Button.setFont(QFont('Noto Sans', 8))
         self.SCrun_Button.setProperty("text","Scanner ON")
         self.SCrun_Button.clicked.connect(self.SCrun)
         self.SCloop_Button.setFont(QFont('Noto Sans', 7))
@@ -296,6 +297,7 @@ class Ui(QtWidgets.QMainWindow):
         self.SCloop_all_Button.setProperty("text","Scanner Loop\nAll FAST")
         self.SCloop_all_Button.clicked.connect(self.scanner_loop_all)
 
+        self.intervall_box.setFont(QFont('Noto Sans', 8))
         self.intervall_box.addItem('60 s')
         self.intervall_box.addItem('120 s')
         self.intervall_box.addItem('240 s')
@@ -307,10 +309,12 @@ class Ui(QtWidgets.QMainWindow):
         self.intervall_box.currentIndexChanged.connect(self.save_change)
         self.intervall_box.setStyleSheet("color: white; background-color: #5a5a5a; selection-background-color: blue;")
 
+        self.Save_Button.setFont(QFont('Noto Sans', 8))
         self.Save_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
         self.Save_Button.clicked.connect(self.save)
         self.Save_Button.setProperty("toolTip", "Save Scan to Excel/LibreOffice File")
         
+        self.G_intervall_box.setFont(QFont('Noto Sans', 8))
         self.G_intervall_box.addItem('0 s')
         self.G_intervall_box.addItem('1 s')
         self.G_intervall_box.addItem('5 s')
@@ -334,6 +338,7 @@ class Ui(QtWidgets.QMainWindow):
         self.textEdit.setStyleSheet("background-color: #464646; color: #ffffff;")
         self.Clear_Button.clicked.connect(self.clear)
         self.Clear_Button.setText("Clear Text")
+        self.t_Save_Button.setFont(QFont('Noto Sans', 8))
         self.t_Save_Button.setStyleSheet("background-color: #5a5a5a; color: #880000;")
         self.t_Save_Button.setText("Save CSV")
         self.t_Save_Button.clicked.connect(self.t_save)
@@ -361,10 +366,12 @@ class Ui(QtWidgets.QMainWindow):
         self.screenshot.setPixmap(self.pixmap)
         
         if SC_card == "YES":
+            self.SC_Button.setFont(QFont('Noto Sans', 8))
             self.SC_Button.setVisible(True)
             self.SC_Button.clicked.connect(self.multi)
         elif SC_card == "NO":
-            self.SC_Button.setVisible(True)
+            self.SC_Button.setFont(QFont('Noto Sans', 8))
+            self.SC_Button.setVisible(false)
             self.SC_Button.clicked.connect(self.multi)
             self.intervall_box.setVisible(False)
             self.Save_Button.setVisible(False)
@@ -1061,6 +1068,7 @@ class Ui(QtWidgets.QMainWindow):
         global shot, graph, scanner
         if shot == 0:
             shot = 1
+            self.SCShot_Button.setFont(QFont('Noto Sans', 8))
             self.SCShot_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
             self.SCShot_Button.setProperty("text","Live SC-Shot\nOff")
             self.setFixedSize(1262, 304)        # breit mit SC
@@ -1078,6 +1086,7 @@ class Ui(QtWidgets.QMainWindow):
                 self.setFixedSize(1262, 304)
         elif shot == 1:
             shot = 0
+            self.SCShot_Button.setFont(QFont('Noto Sans', 8))
             self.SCShot_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
             self.SCShot_Button.setProperty("text","Live SC-Shot\nOn")
             self.setFixedSize(766, 304)         # klein ohne SC
@@ -1149,6 +1158,7 @@ class Ui(QtWidgets.QMainWindow):
         global graph, scanner, shot
         if scanner == 0:
             scanner = 1
+            self.SC_Button.setFont(QFont('Noto Sans', 8))
             self.SC_Button.setStyleSheet("background-color: #5a5a5a; color: #80ff80;")
             self.scanner_widget.setVisible(True)
             self.graph_frame.setVisible(False)
@@ -1175,6 +1185,7 @@ class Ui(QtWidgets.QMainWindow):
             scanner = 0
             self.scanner_widget.setVisible(False)
             self.graph_frame.setVisible(True)
+            self.SC_Button.setFont(QFont('Noto Sans', 8))
             self.SC_Button.setStyleSheet("background-color: #5a5a5a; color: #ffffff;")
             if graph == 1 and shot == 1:
                 self.setFixedSize(1262, 776)
