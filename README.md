@@ -11,6 +11,7 @@ Video: <font size="3"><a href="http://martin-bochum.de/Cloud/Siglent-SDM3055-SC.
 <br>
 Video: <font size="3"><a href="http://martin-bochum.de/Cloud/Siglent-SDM3055-SC-ACI-OK.m4v" target="_blank" >SC-Card ACI bug fix</a>
 
-![Screenshot_20220322_084453](https://user-images.githubusercontent.com/97905711/159431949-ae870127-9292-4f22-bc09-7fb9d73ccfc2.png)
-![Screenshot_20220328_213429](https://user-images.githubusercontent.com/97905711/160473485-cad4db08-c3c2-4393-af29-175a2073a146.png)
-![Screenshot_20220322_084242](https://user-images.githubusercontent.com/97905711/159431619-f0e3ab93-ed7d-4f83-a1f2-3e453128f8dd.png)
+![Screenshot_20250317_115940](https://github.com/user-attachments/assets/4242f7b8-4151-4e38-b9b7-db972df79422)
+![Screenshot_20250317_120028](https://github.com/user-attachments/assets/4dc56fd5-fd3e-4509-bc1d-b43ae2bb3075)
+![Screenshot_20250317_120331](https://github.com/user-attachments/assets/58e40b15-4aad-4f02-bce3-215c3c253d1b)
+![Screenshot_20250317_121036](https://github.com/user-attachments/assets/98e368f6-c91b-436d-bf42-5f0e8d2caf74)
