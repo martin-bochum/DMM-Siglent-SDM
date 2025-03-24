@@ -154,6 +154,8 @@ class Ui(QtWidgets.QMainWindow):
         uic.loadUi(SCREEN , self)        # Load the .ui file
         self.setWindowTitle(leer+'  - SC-Card available: '+SC_card)
 
+        self.menubar.setStyleSheet("background-color: #5a5a5a; selection-background-color: #55aaff; color: rgb(255,255,255); selection-color: black;")
+
         self.F1_Button.setFont(QFont('Noto Sans', 8))
         self.F1_Button.setProperty("text"," ")
         self.F1_Button.clicked.connect(self.f1_click)
