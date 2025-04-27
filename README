@@ -11,7 +11,7 @@ cd ~/DMM-Siglent-SDM
 sudo apt-get install qtcreator
 sudo apt-get install pyqt6-dev-tools
 sudo apt-get install python3-usb
-sudo apt-get install python3-xlswriter
+sudo apt-get install python3-xlsxwriter
 sudo apt-get install python3-pyqtgraph
 sudo apt-get install python3-numpy
 sudo apt-get install pipx
