@@ -1,4 +1,4 @@
-Step 1. Install software and dependencies for Debian 12 and raspios-bookworm (only tested with raspios !)
+Step 1. Install software and dependencies for Debian 12/13 and raspios-bookworm/trixie (only tested with raspios !)
 
 open Console:
 
@@ -17,8 +17,12 @@ sudo apt-get install python3-numpy
 sudo apt-get install pipx
 pipx install python-vxi11
 
-copy Folder 
+copy Folder Debian 12
 ~/.local/pipx/venvs/python-vxi11/lib/python3.11/site-packages/vxi11
+... to Your DMM-Siglent-SDM directory
+
+copy Folder Debian 13
+~/.local/share/pipx/venvs/python-vxi11/lib/python3.13/site-packages/vxi11
 ... to Your DMM-Siglent-SDM directory
 
 qtcreator sdm30xx_V3.ui
@@ -34,6 +38,10 @@ exit           # restart over DESKTOP.
 
 cd ~/DMM-Siglent-SDM
 python3 sdm30xx_time_qt6.py
+
+With Debian 13 / Trixie: if you get an error: no module xdrlib - install ...
+sudo apt install python3-standard-xdrlib
+
 
 ------------------------
 

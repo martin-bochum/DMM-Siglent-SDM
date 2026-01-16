@@ -812,7 +812,6 @@
      <font>
       <family>DejaVu Sans Mono</family>
       <pointsize>42</pointsize>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -875,7 +874,6 @@
       <font>
        <family>DejaVu Sans Mono</family>
        <pointsize>36</pointsize>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -1002,7 +1000,6 @@
       <font>
        <family>DejaVu Sans Mono</family>
        <pointsize>12</pointsize>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -1075,7 +1072,6 @@
       <font>
        <family>DejaVu Sans Mono</family>
        <pointsize>12</pointsize>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -1139,7 +1135,6 @@
       <font>
        <family>DejaVu Sans Mono</family>
        <pointsize>60</pointsize>
-       <weight>75</weight>
        <italic>false</italic>
        <bold>true</bold>
       </font>
@@ -1219,7 +1214,6 @@
       <font>
        <family>DejaVu Sans Mono</family>
        <pointsize>12</pointsize>
-       <weight>75</weight>
        <italic>false</italic>
        <bold>true</bold>
       </font>
@@ -1350,7 +1344,6 @@
       <font>
        <family>DejaVu Sans Mono</family>
        <pointsize>12</pointsize>
-       <weight>75</weight>
        <bold>true</bold>
        <kerning>false</kerning>
       </font>
@@ -1424,7 +1417,6 @@
       <font>
        <family>Noto Sans</family>
        <pointsize>10</pointsize>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -2448,7 +2440,6 @@
     <property name="font">
      <font>
       <pointsize>9</pointsize>
-      <weight>50</weight>
       <bold>false</bold>
      </font>
     </property>
@@ -2495,7 +2486,7 @@
        <x>5</x>
        <y>12</y>
        <width>88</width>
-       <height>30</height>
+       <height>23</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -2804,7 +2795,6 @@
      <font>
       <family>Monospace</family>
       <pointsize>9</pointsize>
-      <weight>50</weight>
       <bold>false</bold>
      </font>
     </property>
@@ -4754,7 +4744,6 @@
       <font>
        <family>DejaVu Sans Mono</family>
        <pointsize>10</pointsize>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -5453,7 +5442,6 @@
       <font>
        <family>DejaVu Sans Mono</family>
        <pointsize>8</pointsize>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -6191,7 +6179,6 @@
      <property name="font">
       <font>
        <pointsize>8</pointsize>
-       <weight>50</weight>
        <bold>false</bold>
        <underline>false</underline>
       </font>
@@ -6275,7 +6262,6 @@
      <property name="font">
       <font>
        <pointsize>8</pointsize>
-       <weight>50</weight>
        <bold>false</bold>
        <underline>false</underline>
       </font>
@@ -6614,7 +6600,7 @@
      <x>0</x>
      <y>0</y>
      <width>1266</width>
-     <height>28</height>
+     <height>20</height>
     </rect>
    </property>
    <property name="palette">
